@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import androidx.appcompat.widget.AppCompatSeekBar;
 import com.cn.graduationclient.R;
 import com.cn.graduationclient.cmd.StructureSystem;
 import com.cn.graduationclient.cmd.TypeSystem;
+import com.cn.graduationclient.db.MessageDbHelper;
 import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.music.GetMusic;
 import com.cn.graduationclient.music.Music;
@@ -91,6 +93,10 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     String my_id,my_phone,my_email;
     String UID,PHONE,EMAIL;
 
+    MessageDbHelper messageDbHelper;
+
+    SQLiteDatabase sqLiteDatabase;
+
     @SuppressLint("HandlerLeak")
     Handler handler_msg=new Handler(){
         @Override
@@ -104,6 +110,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                     String id=jsonObject.getString(StructureSystem.ID);
                     String now=jsonObject.getString(StructureSystem.MSG);
                     String time=jsonObject.getString("time");
+                    sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+id+"','"+now+"','"+time+"')");
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -115,6 +122,9 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.homepage);
+        messageDbHelper=new MessageDbHelper(this);
+
+        sqLiteDatabase=messageDbHelper.getReadableDatabase();
 
         Intent intent=getIntent();
 
