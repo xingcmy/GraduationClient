@@ -658,4 +658,8 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
 
         }
     }
+
+    public void SetList(){
+
+    }
 }
