@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="HoldTitle">
+        <attr name="title" format="string"></attr>
+        <attr name="left" format="reference"></attr>
+        <attr name="right" format="reference"></attr>
+        <attr name="text" format="string"></attr>
+        <attr name="type" format="integer"></attr>
+    </declare-styleable>
+
+    <declare-styleable name="Lable">
+        <attr name="lable" format="string"></attr>
+        <attr name="name" format="string"></attr>
+        <attr name="photo" format="reference"></attr>
+        <attr name="data" format="string"></attr>
+        <attr name="number" format="integer"></attr>
+    </declare-styleable>
+
+    <declare-styleable name="EditLa">
+        <attr name="el" format="string"></attr>
+        <attr name="elname" format="string"></attr>
+        <attr name="elphoto" format="reference"></attr>
+        <attr name="eldata" format="string"></attr>
+        <attr name="elnumber" format="integer"></attr>
+    </declare-styleable>
+
+    <declare-styleable name="Toolbar">
+        <attr format="reference" name="titleTextAppearance"/>
+        <attr format="reference" name="subtitleTextAppearance"/>
+        <attr name="title"/>
+        <attr name="subtitle"/>
+        <attr name="android:gravity"/>
+        <attr format="dimension" name="titleMargin"/>
+        <attr format="dimension" name="titleMarginStart"/>
+        <attr format="dimension" name="titleMarginEnd"/>
+        <attr format="dimension" name="titleMarginTop"/>
+        <attr format="dimension" name="titleMarginBottom"/>
+        <attr format="dimension" name="titleMargins"/>
+        <attr name="contentInsetStart"/>
+        <attr name="contentInsetEnd"/>
+        <attr name="contentInsetLeft"/>
+        <attr name="contentInsetRight"/>
+        <attr name="contentInsetStartWithNavigation"/>
+        <attr name="contentInsetEndWithActions"/>
+        <attr format="dimension" name="maxButtonHeight"/>
+        <attr name="buttonGravity">
+
+        <flag name="top" value="0x30"/>
+
+        <flag name="bottom" value="0x50"/>
+    </attr>
+        <attr format="reference" name="collapseIcon"/>
+        <attr format="string" name="collapseContentDescription"/>
+        <attr name="popupTheme"/>
+        <attr format="reference" name="navigationIcon"/>
+        <attr format="string" name="navigationContentDescription"/>
+        <attr name="logo"/><attr format="string" name="logoDescription"/>
+        <attr format="color" name="titleTextColor"/>
+        <attr format="color" name="subtitleTextColor"/>
+        <attr name="android:minHeight"/>
+    </declare-styleable>
+</resources>

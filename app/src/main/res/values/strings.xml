@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, MainActivity!</string>
+    <string name="app_name">XINGCMY</string>
+    <string name="btn_send">发送</string>
+    <string name="btn_login">登录</string>
+    <string name="btn_convert">退出当前账户</string>
+    <string name="btn_cancel">取消</string>
+    <string name="btn_register">注册</string>
+    <string name="btn_reverse">切换</string>
+    <string name="view_ip">IP地址 </string>
+    <string name="view_port">端口号 </string>
+    <string name="view_name">用户名 </string>
+    <string name="view_user">未登录</string>
+    <string name="conn_fail">连接失败！服务器未开启</string>
+    <string name="view_info">欢迎来到聊天室</string>
+    <string name="exit_tip">你确定要退出吗 ？</string>
+    <string name="yes_btn">确定</string>
+    <string name="no_btn">取消</string>
+    <string name="btn_selimage">选择头像</string>
+    <string name="btn_camera">拍照</string>
+    <string name="btn_normal_voice">按住 说话</string>
+    <string name="btn_press_voice">松开 结束</string>
+    <string name="sd_noexit">SD卡不存在</string>
+    <string name="btn_photo">从相册选择</string>
+    <string name="tip_input">输入框内容不能为空！</string>
+    <string name="login_progress">加载中！请稍后.....</string>
+    <string name="record_short">录音时间太短！</string>
+    <string name="image_input">请选择要上传的头像！</string>
+
+    <string name="mp.music.default_duration">00:00</string>
+
+    <string name="xieyi">用户使用协议</string>
+    <string name="and">和</string>
+    <string name="zhengce">隐私政策</string>
+
+    <string name="agree">同意</string>
+    <string name="decline">不同意</string>
+
+    <string name="message">消息</string>
+    <string name="music">音乐</string>
+    <string name="my">我的</string>
+
+    <string name="my_information">个人信息</string>
+    <string name="finish">完成</string>
+    <string name="my_id">UID</string>
+    <string name="birthday">生日</string>
+    <string name="name">昵称</string>
+    <string name="sex">性别</string>
+    <string name="signature">签名</string>
+    <string name="profession">职业</string>
+    <string name="email">邮箱</string>
+    <string name="city">家乡</string>
+
+    <string name="alter_information">编辑资料</string>
+    <string name="send_message">发消息</string>
+
+
+    <string name="Privacypolicy">当您点击“我同意”按钮接受开发者的用户协议、服务条款等文件时，也表示您接受本政策。
+
+本政策帮助您了解以下内容：
+
+一、我们如何收集和使用您和/或您的终端用户的个人信息
+
+二、我们如何使用Cookie和同类技术
+
+三、终端用户的授权与同意
+
+四、我们如何共享、转让、公开披露您和/或您的终端用户的个人信息
+
+五、第三方服务
+
+六、我们如何保护您和/或您终端用户的个人信息
+
+七、我们如何使您拥有管理个人信息的权利
+
+八、 我们如何处理儿童的个人信息
+
+九、我们如何存储您和/或您的终端用户的个人信息
+
+十、本政策如何更新与修改
+
+十一、如何联系我们
+
+十二、保密义务</string>
+
+</resources>

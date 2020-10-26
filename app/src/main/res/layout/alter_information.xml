@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+    <com.cn.graduationclient.xingcmyAdapter.HoldTitle
+        android:id="@+id/el_hold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="@string/alter_information"
+        app:text="@string/finish"
+        app:type="10"/>
+    <com.cn.graduationclient.xingcmyAdapter.Lable
+        android:id="@+id/information_el_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:lable="@string/my_id"
+        app:number="10"/>
+    <com.cn.graduationclient.xingcmyAdapter.EditLa
+        android:id="@+id/information_el_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:el="@string/name"
+        app:elnumber="10"/>
+    <com.cn.graduationclient.xingcmyAdapter.EditLa
+        android:id="@+id/information_el_signature"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:el="@string/signature"
+        app:elnumber="10"/>
+    <com.cn.graduationclient.xingcmyAdapter.Lable
+        android:id="@+id/information_el_sex"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:lable="@string/sex"
+        app:number="11"/>
+    <com.cn.graduationclient.xingcmyAdapter.Lable
+        android:id="@+id/information_el_birthday"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:lable="@string/birthday"
+        app:number="11"/>
+    <com.cn.graduationclient.xingcmyAdapter.Lable
+        android:id="@+id/information_el_profession"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:lable="@string/profession"
+        app:number="11"/>
+    <com.cn.graduationclient.xingcmyAdapter.Lable
+        android:id="@+id/information_el_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:lable="@string/email"
+        app:number="10"/>
+    <com.cn.graduationclient.xingcmyAdapter.Lable
+        android:id="@+id/information_el_city"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:lable="@string/city"
+        app:number="11"/>
+
+
+
+
+</LinearLayout>

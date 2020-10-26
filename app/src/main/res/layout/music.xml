@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:toolbar="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+    <LinearLayout
+        android:id="@+id/liner_music_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="9">
+            <include layout="@layout/remote_music_player"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/liner_music"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/mp.padding.large"
+        android:gravity="center_horizontal"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            >
+
+            <ImageView
+                android:id="@+id/image_view_album_music"
+                android:layout_width="300dp"
+                android:layout_height="340dp"
+                toolbar:srcCompat="@drawable/ic_baseline_album"
+                android:layout_centerInParent="true"
+                tools:ignore="VectorDrawableCompat" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/text_view_music_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/mp.margin.xlarge"
+            android:layout_marginRight="@dimen/mp.margin.xlarge"
+            android:layout_marginBottom="@dimen/mp.margin.normal"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:textColor="?attr/colorAccent"
+            tools:text="Drag me down"
+            />
+
+        <TextView
+            android:id="@+id/text_view_music_artist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/mp.margin.xlarge"
+            android:layout_marginRight="@dimen/mp.margin.xlarge"
+            android:gravity="center"
+            android:textSize="14sp"
+            android:textColor="?attr/colorAccent"
+            tools:text="One Direction"
+            />
+
+        <LinearLayout
+            android:id="@+id/layout_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:layout_marginTop="@dimen/xingcmy.music.seekBar.marginTop"
+            android:gravity="center_vertical"
+            >
+
+            <TextView
+                android:id="@+id/text_view_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorAccent"
+                android:textSize="12sp"
+                android:singleLine="true"
+                android:text="@string/mp.music.default_duration"
+                />
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                android:id="@+id/seek_bar"
+                style="@style/Widget.AppCompat.SeekBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="10000"
+                tools:progress="5000"
+                />
+
+            <TextView
+                android:id="@+id/text_view_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorAccent"
+                android:textSize="12sp"
+                android:singleLine="true"
+                android:text="@string/mp.music.default_duration"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_play_controls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/xingcmy.music.playControls.marginTop"
+            android:layout_marginBottom="@dimen/xingcmy.music.playControls.marginBottom"
+            android:showDividers="middle"
+            android:divider="@drawable/common_divider_xlarge_horizontal"
+            android:gravity="center_vertical"
+            >
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_play_mode_music_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_play_mode_shuffle"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                tools:ignore="VectorDrawableCompat" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_play_music_last"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_play_last"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                tools:ignore="VectorDrawableCompat" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_play_music_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_play"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                tools:ignore="VectorDrawableCompat" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_play_music_next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_play_next"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                tools:ignore="VectorDrawableCompat" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_favorite_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="center"
+                app:srcCompat="@drawable/ic_favorite_no"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                tools:ignore="VectorDrawableCompat" />
+        </LinearLayout>
+    </LinearLayout>
+    
+</RelativeLayout>
+

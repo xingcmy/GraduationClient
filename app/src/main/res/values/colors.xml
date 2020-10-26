@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+
+    <drawable name="white">#00000000</drawable>
+    <drawable name="yellow">#fbfe81</drawable>
+    <drawable name="btncolor">#1a1a3c</drawable>
+    <color name="sc_transparent">#00ffffff</color>
+
+    <color name="transparent">#00000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <color name="xincmy.popupMenu.background">#B4D2E0</color>
+
+    <color name="smssdk_green">#08979C</color>
+    <color name="smssdk_white_line">#14ffffff</color>
+    <color name="smssdk_hint_textcolor">#7fffffff</color>
+    <color name="smssdk_text_green">#099A9F</color>
+    <color name="mp.theme.dark_blue.colorAccent">#DDF9FF</color>
+
+    <!-- Theme - Dark Blue -->
+    <color name="xingcmy.theme.dark_blue.background">#3C5F78</color>
+    <color name="xingcmy.theme.dark_blue.gradientColor">#507E9F</color>
+    <color name="xingcmy.theme.dark_blue.colorControlActivated">#7AFFFFFF</color>
+    <color name="xingcmy.theme.dark_blue.colorControlHighlight">#7AFFFFFF</color>
+
+    <color name="xingcmy.theme.dark_blue.colorPrimary">#3C5F78</color>
+    <color name="xingcmy.theme.dark_blue.colorPrimaryDark">#3C5F78</color>
+
+    <color name="xingcmy.theme.dark_blue.textColorPrimary">#DDF9FF</color>
+    <color name="xingcmy.theme.dark_blue.textColorSecondary">#3C5F78</color>
+
+    <color name="xingcmy.theme.dark_blue.actionMode.statusBarColor">#9CBDCC</color>
+    <color name="xingcmy.theme.dark_blue.actionMode.background">#9CBDCC</color>
+
+    <color name="xingcmy.text.hint">#9CBDCC</color>
+
+    <color name="xingcmy.line">#3DDDF9FF</color>
+    <color name="xingcmy.list.background">#1ADDF9FF</color>
+    <color name="xingcmy.list.background.selected">#6CDDF9FF</color>
+    <color name="xingcmy.list.scrollThumb">#99DDF9FF</color>
+    <color name="xingcmy.list.text.title">#DDF9FF</color>
+    <color name="xingcmy.list.text.title.selected">#3C5F78</color>
+    <color name="xingcmy.list.text.hint">#9CBDCC</color>
+    <color name="xingcmy.list.text.hint.selected">#7C3C5F78</color>
+
+</resources>

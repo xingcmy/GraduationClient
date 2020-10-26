@@ -1,0 +1,75 @@
+apply plugin: 'com.android.application'
+
+
+apply plugin: 'com.mob.sdk'
+
+MobSDK {
+    appKey "30deb2ac38d02"
+    appSecret "ef97b0eb9043a27fe43b566024b88fb1"
+    SMSSDK {}
+}
+
+android {
+
+    useLibrary 'org.apache.http.legacy'
+    compileSdkVersion 30
+    buildToolsVersion '30.0.1'
+
+    defaultConfig {
+        applicationId "com.cn.graduationclient"
+        minSdkVersion 16
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'junit:junit:4.12'
+    implementation 'androidx.viewpager:viewpager:1.0.0'
+    testImplementation 'junit:junit:4.13'
+    api 'androidx.test.ext:junit:1.1.2'
+    api 'androidx.test.espresso:espresso-core:3.3.0'
+
+
+    implementation 'com.alibaba:fastjson:1.1.70.android'
+    //implementation 'org.apache.httpcomponents:httpclient:4.5.5'
+    implementation 'com.google.protobuf:protobuf-lite:3.0.1'
+
+
+
+
+}
+

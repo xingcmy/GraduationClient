@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <com.cn.graduationclient.xingcmyAdapter.HoldTitle
+        android:id="@+id/friend_hold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="我的好友"
+        app:type="11"
+        app:right="@drawable/ic_add"/>
+    <ListView
+        android:id="@+id/friend_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>

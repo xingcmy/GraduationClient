@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.cn.graduationclient">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+        <activity android:name=".login.LoginActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".login.Register"/>
+        <activity android:name=".login.Email"/>
+        <activity android:name=".homepage.HomePageActivity"/>
+        <activity android:name=".login.Forget"/>
+        <activity android:name=".my.Information"/>
+        <activity android:name=".my.AlterInformation"/>
+        <activity android:name=".my.friend"/>
+        <activity android:name=".my.AddFriend"/>
+        <activity android:name=".my.other.Information"/>
+        <activity android:name=".message.FriendMessage"/>
+        <activity android:name=".login.otherLogin.Email"/>
+        <activity android:name=".login.otherLogin.Phone"/>
+    </application>
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
+        tools:ignore="ProtectedPermissions" />
+    <!-- 往SDCard写入数据权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!-- 访问internet权限 -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- 录音权限 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- 震动权限 -->
+    <uses-permission  android:name="android.permission.VIBRATE"/>
+
+
+
+</manifest>
