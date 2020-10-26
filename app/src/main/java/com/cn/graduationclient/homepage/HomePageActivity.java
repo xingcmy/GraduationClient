@@ -23,12 +23,15 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatSeekBar;
 
 import com.cn.graduationclient.R;
 import com.cn.graduationclient.cmd.StructureSystem;
+import com.cn.graduationclient.cmd.TypeSystem;
+import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.music.GetMusic;
 import com.cn.graduationclient.music.Music;
 import com.cn.graduationclient.music.MusicUtil;
@@ -39,7 +42,11 @@ import com.cn.graduationclient.xingcmyAdapter.HoldTitle;
 import com.cn.graduationclient.xingcmyAdapter.Lable;
 import com.cn.graduationclient.xingcmyAdapter.MusicAdapter;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.sql.Struct;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -79,9 +86,30 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     TextView text_view_duration,text_view_progress;
 
     Handler  handler;
+    HttpUtil httpUtil=new HttpUtil();
 
     String my_id,my_phone,my_email;
     String UID,PHONE,EMAIL;
+
+    @SuppressLint("HandlerLeak")
+    Handler handler_msg=new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            String message= (String) msg.obj;
+            try {
+                JSONObject jsonObject=new JSONObject(message);
+                String error=jsonObject.getString(StructureSystem.ERROR);
+                if (error.equals(StructureSystem.SUCCESS)){
+                    String id=jsonObject.getString(StructureSystem.ID);
+                    String now=jsonObject.getString(StructureSystem.MSG);
+                    String time=jsonObject.getString("time");
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -90,7 +118,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
 
         Intent intent=getIntent();
 
-        my_id=intent.getStringExtra(StructureSystem.UID);
+        UID=intent.getStringExtra(StructureSystem.UID);
         my_phone=intent.getStringExtra("phone");
         my_email=intent.getStringExtra("email");
 
@@ -349,7 +377,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
             public void onClick(View v) {
                 Intent intent=new Intent(HomePageActivity.this, Information.class);
 
-                intent.putExtra("UID",my_id);
+                intent.putExtra("UID",UID);
                 intent.putExtra("phone",my_phone);
                 intent.putExtra("email",my_email);
 
@@ -362,7 +390,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(HomePageActivity.this, friend.class);
-                intent.putExtra("UID",my_id);
+                intent.putExtra("UID",UID);
                 startActivity(intent);
             }
         });
@@ -499,7 +527,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         seekBar.setProgress(currentTime);//设置进度条
         text_view_progress.setText(musicTime(currentTime));//设置显示时间
         handler.sendEmptyMessageDelayed(0,1000);//每隔1000ms更新一次
-    };
+    }
 
     public void getId() {
 
@@ -596,5 +624,28 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
             Toast.makeText(this, "后退键", Toast.LENGTH_SHORT).show();
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    class GetMsg extends Thread{
+        @Override
+        public void run() {
+            super.run();
+            while (true){
+                try {
+                    Thread.sleep(500);
+                    Object msg=httpUtil.httpInMsg(UID, TypeSystem.READ);
+                    Message message=new Message();
+                    message.obj=msg;
+                    handler_msg.sendMessage(message);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
     }
 }
