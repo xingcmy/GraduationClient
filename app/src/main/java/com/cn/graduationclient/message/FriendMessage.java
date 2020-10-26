@@ -84,22 +84,30 @@ public class FriendMessage extends AppCompatActivity {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            String InMsg= (String) msg.obj;
-            try {
-                JSONObject jsonObject=new JSONObject(InMsg);
-                String error=jsonObject.getString(StructureSystem.ERROR);
-                if (error.equals(StructureSystem.SUCCESS)){
-                    String send_id=jsonObject.getString(StructureSystem.ID);
-                    String message=jsonObject.getString(StructureSystem.MSG);
-                    String time=jsonObject.getString("time");
-
-                    sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+send_id+"','"+send_id+"','"+message+"','"+time+"')");
+            switch (msg.what){
+                case 0x00:
                     setList();
-                }
+                    break;
+                case 0x01:
+                    String InMsg= (String) msg.obj;
+                    try {
+                        JSONObject jsonObject=new JSONObject(InMsg);
+                        String error=jsonObject.getString(StructureSystem.ERROR);
+                        if (error.equals(StructureSystem.SUCCESS)){
+                            String send_id=jsonObject.getString(StructureSystem.ID);
+                            String message=jsonObject.getString(StructureSystem.MSG);
+                            String time=jsonObject.getString("time");
 
-            } catch (JSONException e) {
-                e.printStackTrace();
+                            sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+send_id+"','"+send_id+"','"+message+"','"+time+"')");
+                            setList();
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
             }
+
 
         }
     };
@@ -161,6 +169,9 @@ public class FriendMessage extends AppCompatActivity {
                                 if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
                                     sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+UID+"','"+ctn+"','"+setTime()+"')");
 
+                                    Message message=new Message();
+                                    message.what=0x00;
+                                    handler.sendMessage(message);
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -169,7 +180,7 @@ public class FriendMessage extends AppCompatActivity {
                             }
                         }
                     }).start();
-                    setList();
+                    //setList();
                 }
             }
         });
@@ -317,6 +328,7 @@ public class FriendMessage extends AppCompatActivity {
                         if (msg!=null){
                             Message message=new Message();
                             message.obj=msg;
+                            message.what=0x01;
                             handler.sendMessage(message);
                         }
                     } catch (IOException e) {
@@ -368,10 +380,18 @@ public class FriendMessage extends AppCompatActivity {
             for (int i=0;i<length;i++){
 
                 al = new HashMap<String, String>();
-                al.put("id",id[i]);
-                al.put("name",name[i]);
-                al.put("message",message[i]);
-                al.put("time",time[i]);
+                if (id[i].equals(UID)){
+                    al.put("id","");
+                    al.put("name",id[i]);
+                    al.put("message",message[i]);
+                    al.put("time",time[i]);
+                }else {
+                    al.put("id",id[i]);
+                    al.put("name","");
+                    al.put("message",message[i]);
+                    al.put("time",time[i]);
+                }
+
                 photolist.add(al);
             }
         }
