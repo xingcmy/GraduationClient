@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+        <com.cn.graduationclient.xingcmyAdapter.HoldTitle
+            android:id="@+id/information_add_friend_hold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title="详细信息"
+            app:type="10"/>
+        <com.cn.graduationclient.xingcmyAdapter.Lable
+            android:id="@+id/information_add_friend_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:lable="@string/my_id"
+            app:number="10"/>
+        <com.cn.graduationclient.xingcmyAdapter.Lable
+            android:id="@+id/information_add_friend_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:lable="@string/name"
+            app:number="10"/>
+        <com.cn.graduationclient.xingcmyAdapter.Lable
+            android:id="@+id/information_add_friend_signature"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:lable="@string/signature"
+            app:number="10"/>
+        <com.cn.graduationclient.xingcmyAdapter.Lable
+            android:id="@+id/information_add_friend_sex"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:lable="@string/sex"
+            app:number="10"/>
+        <com.cn.graduationclient.xingcmyAdapter.Lable
+            android:id="@+id/information_add_friend_birthday"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:lable="@string/birthday"
+            app:number="10"/>
+        <com.cn.graduationclient.xingcmyAdapter.Lable
+            android:id="@+id/information_add_friend_profession"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:lable="@string/profession"
+            app:number="10"/>
+        <com.cn.graduationclient.xingcmyAdapter.Lable
+            android:id="@+id/information_add_friend_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:lable="@string/email"
+            app:number="10"/>
+        <com.cn.graduationclient.xingcmyAdapter.Lable
+            android:id="@+id/information_add_friend_city"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:lable="@string/city"
+            app:number="10"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="10">
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TableRow>
+                <Button
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="16sp"
+                    android:text="@string/add_friend"
+                    android:background="@color/colorPrimaryDark"
+                    android:id="@+id/add_friend_button"/>
+            </TableRow>
+        </TableLayout>
+
+    </LinearLayout>
+
+
+
+</LinearLayout>
