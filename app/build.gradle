@@ -67,7 +67,8 @@ dependencies {
     implementation 'com.alibaba:fastjson:1.1.70.android'
     //implementation 'org.apache.httpcomponents:httpclient:4.5.5'
     implementation 'com.google.protobuf:protobuf-lite:3.0.1'
-
+    implementation group: 'com.squareup.okio', name: 'okio', version: '1.14.0'
+    implementation 'org.wso2.orbit.com.squareup.okhttp:okhttp:4.2.0.wso2v1'
 
 
 
