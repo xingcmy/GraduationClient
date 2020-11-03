@@ -6,9 +6,64 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.cn.graduationclient.xingcmyAdapter.HoldTitle
+        android:id="@+id/profession_alter"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         app:title="@string/profession"
-        app:type="10"
-        android:id="@+id/profession_alter"/>
+        app:type="10" />
+    <RadioGroup
+        android:id="@+id/rg_profession"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RadioButton
+            android:id="@+id/rb_it"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="计算机/互联网/通信"
+            android:textColor="@color/colorAccent"
+            android:textSize="20sp"/>
+        <RadioButton
+            android:id="@+id/rb_jr"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:textSize="20sp"
+            android:textColor="@color/colorAccent"
+            android:text="金融/银行/投资/保险"/>
+        <RadioButton
+            android:id="@+id/rb_ys"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="艺术/娱乐/表演"
+            android:textColor="@color/colorAccent"
+            android:textSize="20sp"/>
+        <RadioButton
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:textSize="20sp"
+            android:textColor="@color/colorAccent"
+            android:text="公务员/行政/事业单位"
+            android:id="@+id/rb_xz"/>
+        <RadioButton
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="教育/培训"
+            android:textColor="@color/colorAccent"
+            android:textSize="20sp"
+            android:id="@+id/rb_jy"/>
+        <RadioButton
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:textSize="20sp"
+            android:textColor="@color/colorAccent"
+            android:text="学生"
+            android:id="@+id/rb_xs"/>
+        <RadioButton
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="其他职业"
+            android:textColor="@color/colorAccent"
+            android:textSize="20sp"
+            android:id="@+id/rb_qt"/>
+    </RadioGroup>
 </LinearLayout>

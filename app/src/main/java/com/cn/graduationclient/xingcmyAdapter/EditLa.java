@@ -66,4 +66,8 @@ public class EditLa extends RelativeLayout {
     public void setTv_labletitle(String name){
         tv_labletitle.setText(name);
     }
+
+    public String getTv_labletitle(){
+        return tv_labletitle.getText().toString();
+    }
 }
