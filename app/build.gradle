@@ -59,6 +59,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
     implementation 'junit:junit:4.12'
     implementation 'androidx.viewpager:viewpager:1.0.0'
+    implementation files('libs\\jackson-all-1.8.5.jar')
     testImplementation 'junit:junit:4.13'
     api 'androidx.test.ext:junit:1.1.2'
     api 'androidx.test.espresso:espresso-core:3.3.0'
@@ -69,6 +70,7 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-lite:3.0.1'
     implementation group: 'com.squareup.okio', name: 'okio', version: '1.14.0'
     implementation 'org.wso2.orbit.com.squareup.okhttp:okhttp:4.2.0.wso2v1'
+    //implementation 'org.codehaus.jackson:jackson-all:1.8.5'
 
 
 

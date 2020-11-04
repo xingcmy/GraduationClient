@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -34,6 +35,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
@@ -53,9 +55,13 @@ import com.cn.graduationclient.tool.SystemConstant;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -163,7 +169,7 @@ public class FriendMessage extends AppCompatActivity {
                         @Override
                         public void run() {
                             try {
-                                String cs=httpUtil.httpSendMsg(UID,id,ctn, StructureSystem.MSG_TEXT, TypeSystem.WRITE);
+                                String cs=httpUtil.httpSendMsg(UID,id,ctn, TypeSystem.MSG_TEXT, TypeSystem.WRITE);
                                 Log.d("cs",cs);
                                 JSONObject jsonObject=new JSONObject(cs);
                                 if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
@@ -404,5 +410,6 @@ public class FriendMessage extends AppCompatActivity {
         lv_message.setAdapter(simpleAdapter);
 
     }
+
 
 }

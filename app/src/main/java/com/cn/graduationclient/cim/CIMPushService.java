@@ -21,6 +21,7 @@
  */
 package com.cn.graduationclient.cim;
 
+import android.annotation.SuppressLint;
 import android.app.*;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -104,6 +105,7 @@ public class CIMPushService extends Service {
 
     };
 
+    @SuppressLint("HandlerLeak")
     private final Handler connectHandler = new Handler() {
         @Override
         public void handleMessage(android.os.Message message) {
@@ -111,6 +113,7 @@ public class CIMPushService extends Service {
         }
     };
 
+    @SuppressLint("HandlerLeak")
     private final Handler notificationHandler = new Handler() {
         @Override
         public void handleMessage(android.os.Message message) {

@@ -17,11 +17,13 @@ import android.widget.DatePicker;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.cn.graduationclient.R;
+import com.cn.graduationclient.cmd.StructureSystem;
 import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.my.city.ProvinceCity;
 import com.cn.graduationclient.xingcmyAdapter.EditLa;
@@ -103,6 +105,21 @@ public class AlterInformation extends Activity {
                        String alter_birthday=information_birthday.getTv_labletitle();
                        String alter_profession=information_profession.getTv_labletitle();
                        String alter_city=information_city.getTv_labletitle();
+
+                       try {
+                           String error=httpUtil.httpAlterInformation(UID,alter_name,alter_signature,alter_sex,alter_birthday,alter_profession,alter_city);
+
+                           JSONObject jsonObject=new JSONObject(error);
+
+                           if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
+                               Toast.makeText(AlterInformation.this,"修改成功！",Toast.LENGTH_SHORT).show();
+                               AlterInformation.this.finish();
+                           }
+                       } catch (IOException e) {
+                           e.printStackTrace();
+                       } catch (JSONException e) {
+                           e.printStackTrace();
+                       }
                    }
                }).start();
            }
@@ -330,7 +347,7 @@ public class AlterInformation extends Activity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         for (int i=0;i<34;i++){
-            if (ProvinceCity.province[i].equals(city)){
+            if (ProvinceCity.province[i].equals(information_city.getTv_labletitle())){
                 spinner.setSelection(i);
                 break;
             }

@@ -6,7 +6,10 @@ import androidx.annotation.RequiresApi;
 
 import com.cn.graduationclient.cmd.StructureSystem;
 import com.cn.graduationclient.cmd.TypeSystem;
+import com.cn.graduationclient.xingcmyAdapter.json.JSONUtil;
+import com.cn.graduationclient.xingcmyAdapter.json.MessageUtil;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,11 +28,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
-public class HttpUtil {
+public class HttpUtil implements ClientHttp {
 
     private static String str_url="http://192.168.1.104:8080/xingcmy/";
 
+    @Override
     public HttpURLConnection http(String servlet) {
         try {
             URL url = new URL(str_url+servlet);
@@ -60,6 +66,7 @@ public class HttpUtil {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @Override
     public String httpLogin(String username, String password) throws IOException, JSONException {
        HttpURLConnection httpUrlConnection= http("Login");
 
@@ -89,6 +96,7 @@ public class HttpUtil {
         return null;
     }
 
+    @Override
     public String httpRegister(String phone,String password,String email) throws IOException, JSONException {
         HttpURLConnection httpURLConnection=http("Register");
 
@@ -117,6 +125,7 @@ public class HttpUtil {
         return null;
     }
 
+    @Override
     public String httpEmail(String email) throws IOException, JSONException {
         HttpURLConnection httpURLConnection=http("Email");
 
@@ -143,6 +152,7 @@ public class HttpUtil {
         return null;
     }
 
+    @Override
     public String httpInformation(String id) throws IOException,JSONException{
 
         HttpURLConnection httpURLConnection=http("Information");
@@ -171,6 +181,7 @@ public class HttpUtil {
 
     }
 
+    @Override
     public String httpGetIdPhoneEmail(String id) throws IOException,JSONException{
 
         HttpURLConnection httpURLConnection=http("ReturnIdPhoneEmail");
@@ -199,6 +210,7 @@ public class HttpUtil {
 
     }
 
+    @Override
     public String httpFriendId(String id) throws IOException, JSONException {
         HttpURLConnection httpURLConnection=http("ReturnFriendId");
 
@@ -224,42 +236,52 @@ public class HttpUtil {
         return null;
     }
 
-    public String httpSendMsg(String UID,String id,String msg,String type,int write)throws IOException,JSONException{
+    @Override
+    public String httpSendMsg(String UID,String id,String msg,int type,int write)throws IOException,JSONException{
         HttpURLConnection httpURLConnection=http("Msg");
 
         OutputStream outputStream=httpURLConnection.getOutputStream();
         ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
 
-        JSONObject jsonObject=new JSONObject();
-        jsonObject.put(StructureSystem.UID,UID);
-        jsonObject.put(StructureSystem.WRITE,write);
-        jsonObject.put(StructureSystem.READ,write);
-        switch (type){
-            case StructureSystem.MSG_TEXT:
-                jsonObject.put(StructureSystem.MSG_TYPE,TypeSystem.MSG_TEXT);
-                jsonObject.put(StructureSystem.ID,id);
-                jsonObject.put(StructureSystem.MSG,msg);
-                break;
-            case StructureSystem.MSG_IMAGE:
-                jsonObject.put(StructureSystem.MSG_TYPE,TypeSystem.MSG_IMAGE);
-                jsonObject.put(StructureSystem.ID,id);
-                break;
-            case StructureSystem.MSG_MUSIC:
-                jsonObject.put(StructureSystem.MSG_TYPE,TypeSystem.MSG_MUSIC);
-                jsonObject.put(StructureSystem.ID,id);
-                break;
-            case StructureSystem.MSG_VIDEO:
-                jsonObject.put(StructureSystem.MSG_TYPE,TypeSystem.MSG_VIDEO);
-                jsonObject.put(StructureSystem.ID,id);
-                break;
-            case StructureSystem.MSG_NEW:
-                jsonObject.put(StructureSystem.MSG_NEW,TypeSystem.MSG_NEW);
-                jsonObject.put(StructureSystem.ID,id);
-                break;
-        }
+        MessageUtil messageUtil=new MessageUtil();
+        Map<String, Object> resultMap = new HashMap<>();
+        messageUtil.setStatus(write);
+        messageUtil.setType(type);
+        messageUtil.setSender(UID);
+        messageUtil.setFromTo(id);
+        messageUtil.setMsg(msg);
 
 
-        objectOutputStream.writeObject(jsonObject.toString());
+//        JSONObject jsonObject=new JSONObject();
+//        jsonObject.put(StructureSystem.UID,UID);
+//        jsonObject.put(StructureSystem.WRITE,write);
+//        jsonObject.put(StructureSystem.READ,write);
+//        switch (type){
+//            case StructureSystem.MSG_TEXT:
+//                jsonObject.put(StructureSystem.MSG_TYPE,TypeSystem.MSG_TEXT);
+//                jsonObject.put(StructureSystem.ID,id);
+//                jsonObject.put(StructureSystem.MSG,msg);
+//                break;
+//            case StructureSystem.MSG_IMAGE:
+//                jsonObject.put(StructureSystem.MSG_TYPE,TypeSystem.MSG_IMAGE);
+//                jsonObject.put(StructureSystem.ID,id);
+//                break;
+//            case StructureSystem.MSG_MUSIC:
+//                jsonObject.put(StructureSystem.MSG_TYPE,TypeSystem.MSG_MUSIC);
+//                jsonObject.put(StructureSystem.ID,id);
+//                break;
+//            case StructureSystem.MSG_VIDEO:
+//                jsonObject.put(StructureSystem.MSG_TYPE,TypeSystem.MSG_VIDEO);
+//                jsonObject.put(StructureSystem.ID,id);
+//                break;
+//            case StructureSystem.MSG_NEW:
+//                jsonObject.put(StructureSystem.MSG_NEW,TypeSystem.MSG_NEW);
+//                jsonObject.put(StructureSystem.ID,id);
+//                break;
+//        }
+
+
+        objectOutputStream.writeObject(JSONUtil.ObjectToJson(messageUtil));
         objectOutputStream.flush();
         objectOutputStream.close();
 
@@ -272,6 +294,7 @@ public class HttpUtil {
         return null;
     }
 
+    @Override
     public Object httpInMsg(String UID,int read) throws IOException, JSONException {
         HttpURLConnection httpURLConnection=http("Msg");
 
@@ -291,6 +314,41 @@ public class HttpUtil {
         BufferedReader readL=new BufferedReader(reader);
         String line="";
         while ((line=readL.readLine())!=null){
+            return line;
+        }
+        return null;
+    }
+    @Override
+    public String httpAlterInformation(String uid,String name,String signature,String sex,String birthday,String profession,String city) throws IOException, JSONException {
+        HttpURLConnection httpURLConnection=http("AlterInformation");
+
+        OutputStream outputStream=httpURLConnection.getOutputStream();
+
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
+
+        JSONObject jsonObject=new JSONObject();
+//        JSONArray jsonArray=new JSONArray();
+//
+//        jsonArray.put(TypeSystem.MSG_MUSIC,name);
+
+        jsonObject.put(StructureSystem.UID,uid);
+        jsonObject.put(StructureSystem.NAME,name);
+        jsonObject.put(StructureSystem.SIGNATURE,signature);
+        jsonObject.put(StructureSystem.SEX,sex);
+        jsonObject.put(StructureSystem.BIRTHDAY,birthday);
+        jsonObject.put(StructureSystem.PROFESSION,profession);
+        jsonObject.put(StructureSystem.CITY,city);
+
+        objectOutputStream.writeObject(jsonObject.toString());
+        //objectOutputStream.writeObject(jsonArray.toString());
+        objectOutputStream.flush();
+        objectOutputStream.close();
+
+        InputStreamReader reader=new InputStreamReader(httpURLConnection.getInputStream());
+
+        BufferedReader bufferedReader=new BufferedReader(reader);
+        String line="";
+        if ((line=bufferedReader.readLine())!=null){
             return line;
         }
         return null;
