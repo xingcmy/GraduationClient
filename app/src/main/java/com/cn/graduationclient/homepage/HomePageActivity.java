@@ -4,7 +4,10 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -50,6 +53,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.sql.Struct;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -58,6 +62,7 @@ import java.util.TimerTask;
 public class HomePageActivity extends Activity implements View.OnClickListener {
 
     private static final String TAG ="XINGCMY";
+    private static final int REQUEST_CODE_SOME_FEATURES_PERMISSIONS =1 ;
     LinearLayout radio_message,radio_music,radio_my;
 
     ListView listView;
@@ -122,51 +127,65 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.homepage);
-        messageDbHelper=new MessageDbHelper(this);
 
-        sqLiteDatabase=messageDbHelper.getReadableDatabase();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-        Intent intent=getIntent();
+            int hasWritePermission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            int hasReadPermission = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
 
-        UID=intent.getStringExtra(StructureSystem.UID);
-        my_phone=intent.getStringExtra("phone");
-        my_email=intent.getStringExtra("email");
+            List<String> permissions = new ArrayList<String>();
+            if (hasWritePermission != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            } else {
+                messageDbHelper=new MessageDbHelper(this);
 
-        getViewId();
-        getId();
-        onclickMessage();
+                sqLiteDatabase=messageDbHelper.getReadableDatabase();
 
+                Intent intent=getIntent();
 
+                UID=intent.getStringExtra(StructureSystem.UID);
+                my_phone=intent.getStringExtra("phone");
+                my_email=intent.getStringExtra("email");
 
-        registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+                getViewId();
+                getId();
+                onclickMessage();
             }
 
-            @Override
-            public void onActivityStarted(Activity activity) {
+            if (hasReadPermission != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+
+            } else {
+
             }
 
-            @Override
-            public void onActivityResumed(Activity activity) {
+            if (!permissions.isEmpty()) {
+                requestPermissions(permissions.toArray(new String[permissions.size()]), REQUEST_CODE_SOME_FEATURES_PERMISSIONS);
             }
+        }
 
-            @Override
-            public void onActivityPaused(Activity activity) {
-            }
 
-            @Override
-            public void onActivityStopped(Activity activity) {
-            }
-            @Override
-            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-            }
 
-            @Override
-            public void onActivityDestroyed(Activity activity) {
-            }
-        });
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_SOME_FEATURES_PERMISSIONS: {
+                for (int i = 0; i < permissions.length; i++) {
+                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                        System.out.println("Permissions --> " + "Permission Granted: " + permissions[i]);
+                    } else if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                        System.out.println("Permissions --> " + "Permission Denied: " + permissions[i]);
+                    }
+                }
+            }
+            break;
+            default: {
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            }
+        }
     }
 
     public void getViewId(){
@@ -190,6 +209,8 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         liner_music.setVisibility(View.GONE);
         Listening();
         success=0;
+
+
 
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -586,6 +607,13 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         image_view_play_toggle.setImageResource(image[0]);
         radioButton_list.setChecked(true);
 
+        NotificationManager nMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        try {
+            nMgr.cancelAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         lists = new MusicUtil().getMusic(this);
         Log.i(TAG, "" + lists);
         adapter = new MusicAdapter(lists, this);
@@ -598,6 +626,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE},1);
         }
+
 
 
     }

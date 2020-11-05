@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class HttpUtil implements ClientHttp {
 
-    private static String str_url="http://192.168.1.104:8080/xingcmy/";
+    private static String str_url="http://192.168.1.105:8080/xingcmy/";
 
     @Override
     public HttpURLConnection http(String servlet) {
@@ -126,7 +126,35 @@ public class HttpUtil implements ClientHttp {
     }
 
     @Override
-    public String httpEmail(String email) throws IOException, JSONException {
+    public String httpPhone(String phone,String type)throws IOException,JSONException{
+        HttpURLConnection httpURLConnection=http("Phone");
+
+        OutputStream outputStream=httpURLConnection.getOutputStream();
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
+
+        JSONObject jsonObject=new JSONObject();
+
+        jsonObject.put(StructureSystem.PHONE,phone);
+        jsonObject.put(StructureSystem.TYPE,type);
+
+        objectOutputStream.writeObject(jsonObject.toString());
+        objectOutputStream.flush();
+        objectOutputStream.close();
+
+        InputStreamReader read = new InputStreamReader(
+                httpURLConnection.getInputStream());
+        BufferedReader reader = new BufferedReader(read);
+        String line = "";
+        while ((line = reader.readLine()) != null) {
+
+            return  line;
+
+        }
+        return null;
+    }
+
+    @Override
+    public String httpEmail(String email,String type) throws IOException, JSONException {
         HttpURLConnection httpURLConnection=http("Email");
 
         OutputStream outputStream=httpURLConnection.getOutputStream();
@@ -135,6 +163,7 @@ public class HttpUtil implements ClientHttp {
         JSONObject jsonObject=new JSONObject();
 
         jsonObject.put(StructureSystem.EMAIL,email);
+        jsonObject.put(StructureSystem.TYPE,type);
 
         objectOutputStream.writeObject(jsonObject.toString());
         objectOutputStream.flush();
@@ -182,7 +211,7 @@ public class HttpUtil implements ClientHttp {
     }
 
     @Override
-    public String httpGetIdPhoneEmail(String id) throws IOException,JSONException{
+    public String httpGetIdPhoneEmail(String idEmailPhone) throws IOException,JSONException{
 
         HttpURLConnection httpURLConnection=http("ReturnIdPhoneEmail");
 
@@ -191,7 +220,7 @@ public class HttpUtil implements ClientHttp {
 
         JSONObject jsonObject=new JSONObject();
 
-        jsonObject.put(StructureSystem.ID,id);
+        jsonObject.put(StructureSystem.ID,idEmailPhone);
 
         objectOutputStream.writeObject(jsonObject.toString());
         objectOutputStream.flush();
@@ -301,12 +330,13 @@ public class HttpUtil implements ClientHttp {
         OutputStream outputStream=httpURLConnection.getOutputStream();
         ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
 
-        JSONObject jsonObject=new JSONObject();
-        jsonObject.put(StructureSystem.UID,UID);
-        jsonObject.put(StructureSystem.WRITE,read);
-        jsonObject.put(StructureSystem.READ,read);
+        MessageUtil messageUtil=new MessageUtil();
+        Map<String, Object> resultMap = new HashMap<>();
+        messageUtil.setStatus(read);
+        messageUtil.setSender(UID);
+        //jsonObject.put(StructureSystem.READ,read);
 
-        objectOutputStream.writeObject(jsonObject.toString());
+        objectOutputStream.writeObject(JSONUtil.ObjectToJson(messageUtil));
         objectOutputStream.flush();
         objectOutputStream.close();
 

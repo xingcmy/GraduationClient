@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.cn.graduationclient.R;
+import com.cn.graduationclient.cmd.StructureSystem;
 import com.cn.graduationclient.http.HttpUtil;
 
 import org.json.JSONException;
@@ -91,7 +92,7 @@ public class Email extends Activity implements View.OnClickListener {
                     @Override
                     public void run() {
                         try {
-                            String j_email=httpUtil.httpEmail(et_email.getText().toString());
+                            String j_email=httpUtil.httpEmail(et_email.getText().toString(), StructureSystem.REGISTER);
                             JSONObject jsonObject=new JSONObject(j_email);
                             if (jsonObject.getString("error").equals("success")){
                                 email_yan=jsonObject.getString("email_yan");

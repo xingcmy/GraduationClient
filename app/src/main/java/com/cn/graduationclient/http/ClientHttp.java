@@ -9,7 +9,8 @@ public interface ClientHttp {
     HttpURLConnection http(String servlet);
     String httpLogin(String username, String password)throws IOException, JSONException;
     String httpRegister(String phone, String password, String email) throws IOException, JSONException;
-    String httpEmail(String email) throws IOException, JSONException;
+    String httpPhone(String phone,String type)throws IOException,JSONException;
+    String httpEmail(String email,String type) throws IOException, JSONException;
     String httpInformation(String id) throws IOException,JSONException;
     String httpGetIdPhoneEmail(String id) throws IOException,JSONException;
     String httpFriendId(String id) throws IOException, JSONException;

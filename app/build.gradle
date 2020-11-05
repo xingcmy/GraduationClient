@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 
-
+//apply plugin: 'android-apt'
 apply plugin: 'com.mob.sdk'
 
 MobSDK {
@@ -71,6 +71,9 @@ dependencies {
     implementation group: 'com.squareup.okio', name: 'okio', version: '1.14.0'
     implementation 'org.wso2.orbit.com.squareup.okhttp:okhttp:4.2.0.wso2v1'
     //implementation 'org.codehaus.jackson:jackson-all:1.8.5'
+//    implementation 'com.github.hotchemi:permissionsdispatcher:2.1.2'
+//    api 'com.github.hotchemi:permissionsdispatcher-processor:2.1.2'
+
 
 
 

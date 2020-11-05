@@ -33,7 +33,7 @@
             android:background="#00112233"
             android:digits="._@0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLIMNOPQRSTUVWXYZ"
             android:gravity="center_vertical"
-            android:maxLength="11"
+            android:maxLength="50"
             android:maxLines="1"
             android:paddingLeft="70.0dip"
             android:paddingRight="66.0dip"
