@@ -2,6 +2,7 @@ package com.cn.graduationclient.cmd;
 
 public class StructureSystem {
     public final static String TYPE="type";
+
     public final static String UID="UID";
     public final static String ID="id";
     public final static String PHONE="phone";
@@ -31,4 +32,11 @@ public class StructureSystem {
 
     public final static String WRITE="write";
     public final static String READ="read";
+
+    public static final String LOGIN ="login" ;
+    public static final String REGISTER="register";
+
+    public static final String ADD_FRIEND="addFriend";
+    public static final String FRIEND_YES="yes";
+    public static final String FRIEND_NO="no";
 }

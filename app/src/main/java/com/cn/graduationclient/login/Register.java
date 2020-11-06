@@ -32,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 
 import com.cn.graduationclient.R;
+import com.cn.graduationclient.cmd.StructureSystem;
 import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.xingcmyAdapter.HoldTitle;
 import com.mob.MobSDK;
@@ -53,8 +54,7 @@ public class Register extends Activity implements View.OnClickListener {
     Button b_yan,b_register;
 
     int success=0;
-
-
+    HttpUtil httpUtil=new HttpUtil();
     String phone_number,yan_number;
 
     CheckBox checkBox;
@@ -62,8 +62,6 @@ public class Register extends Activity implements View.OnClickListener {
     Socket socket;
 
     boolean yes_no=true;
-
-    HttpUtil httpUtil=new HttpUtil();
 
 
 
@@ -84,6 +82,7 @@ public class Register extends Activity implements View.OnClickListener {
                 msg.arg1=event;
                 msg.arg2=result;
                 msg.obj=data;
+                msg.what=0x01;
 //                handler.sendMessage(msg);
                 handler.sendMessage(msg);
                 if (event == SMSSDK.EVENT_SUBMIT_VERIFICATION_CODE) {
@@ -98,6 +97,7 @@ public class Register extends Activity implements View.OnClickListener {
                                     Intent intent=new Intent(Register.this,Email.class);
                                     intent.putExtra("phone",et_phone.getText().toString());
                                     startActivity(intent);
+                                    Register.this.finish();
                                 }
                                 else Toast.makeText(Register.this,"验证码错误",Toast.LENGTH_LONG).show();
                         }
@@ -114,32 +114,45 @@ public class Register extends Activity implements View.OnClickListener {
             public void handleMessage(Message msg){
 
                 super.handleMessage(msg);
-                int event=msg.arg1;
-                int result=msg.arg2;
-                Object data=msg.obj;
-                if (event== SMSSDK.EVENT_GET_VERIFICATION_CODE){
-                    if (result== SMSSDK.RESULT_COMPLETE){
-                        boolean smart= (boolean) data;
-                        if (smart){
-                            et_phone.requestFocus();
-                            return;
+                switch (msg.what){
+                    case 0x01:
+                        int event=msg.arg1;
+                        int result=msg.arg2;
+                        Object data=msg.obj;
+                        if (event== SMSSDK.EVENT_GET_VERIFICATION_CODE){
+                            if (result== SMSSDK.RESULT_COMPLETE){
+                                boolean smart= (boolean) data;
+                                if (smart){
+                                    et_phone.requestFocus();
+                                    return;
+                                }
+                            }
                         }
-                    }
-                }
-                if (result== SMSSDK.RESULT_COMPLETE){
-                    if (event== SMSSDK.EVENT_GET_VERIFICATION_CODE){
+                        if (result== SMSSDK.RESULT_COMPLETE){
+                            if (event== SMSSDK.EVENT_GET_VERIFICATION_CODE){
 
-                    }
-                }
-                else {
-                    if (flag){
-                        b_yan.setVisibility(View.VISIBLE);
-                        et_phone.requestFocus();
-                    }
-                    else {
+                            }
+                        }
+                        else {
+                            if (flag){
+                                b_yan.setVisibility(View.VISIBLE);
+                                et_phone.requestFocus();
+                            }
+                            else {
 
-                    }
+                            }
+                        }
+                        break;
+                    case 0x02:
+                        SMSSDK.getVerificationCode("86",phone_number);
+                        et_yan.requestFocus();
+                        flog=true;
+                        break;
+                    case 0x03:
+                        Toast.makeText(Register.this,"当前手机号已被注册",Toast.LENGTH_SHORT).show();
+                        break;
                 }
+
             }
         };
 
@@ -257,9 +270,25 @@ public class Register extends Activity implements View.OnClickListener {
             case R.id.b_registeryan:
                 if (judPhone()){
                     //submitPrivacyGrantResult(true);
-                    SMSSDK.getVerificationCode("86",phone_number);
-                    et_yan.requestFocus();
-                    flog=true;
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                String j_phone=httpUtil.httpPhone(phone_number, StructureSystem.REGISTER);
+                                Message message=new Message();
+                                JSONObject jsonObject=new JSONObject(j_phone);
+                                if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
+                                    message.what=0x02;
+                                }else if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.FAILED)){
+                                    message.what=0x03;
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
                 }
                 break;
         }

@@ -50,6 +50,9 @@ public class Phone extends Activity implements View.OnClickListener {
                     Toast.makeText(com.cn.graduationclient.login.otherLogin.Phone.this,"当前手机号未注册",Toast.LENGTH_SHORT).show();
                     break;
                 case 0x01:
+                    SMSSDK.getVerificationCode("86",phoneId);
+                    editText_yan.requestFocus();
+                    flog=true;
                     try {
                         JSONObject jsonObject=new JSONObject((String) msg.obj);
                         UID=jsonObject.getString(StructureSystem.ID);
@@ -128,10 +131,6 @@ public class Phone extends Activity implements View.OnClickListener {
                                 Message message=new Message();
                                 JSONObject jsonObject=new JSONObject(j_phone);
                                 if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
-                                    SMSSDK.getVerificationCode("86",phoneId);
-
-                                    editText_yan.requestFocus();
-                                    flog=true;
                                     String IdPhoneEmail=httpUtil.httpGetIdPhoneEmail(phoneId);
                                     message.obj=IdPhoneEmail;
                                     message.what=0x01;
