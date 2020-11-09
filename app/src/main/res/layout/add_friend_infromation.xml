@@ -76,6 +76,7 @@
             android:layout_height="match_parent">
             <TableRow>
                 <Button
+                    android:visibility="visible"
                     android:layout_weight="1"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -83,7 +84,27 @@
                     android:textSize="16sp"
                     android:text="@string/add_friend"
                     android:background="@color/colorPrimaryDark"
-                    android:id="@+id/add_friend_button"/>
+                    android:id="@+id/add_friend_button_add"/>
+                <Button
+                    android:visibility="gone"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="16sp"
+                    android:text="@string/alter_information"
+                    android:background="@color/colorPrimaryDark"
+                    android:id="@+id/add_friend_button_alter"/>
+                <Button
+                    android:visibility="gone"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="16sp"
+                    android:text="@string/send_message"
+                    android:background="@color/colorPrimaryDark"
+                    android:id="@+id/add_friend_button_setMsg"/>
             </TableRow>
         </TableLayout>
 

@@ -170,6 +170,7 @@ public class friend extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(friend.this,AddFriend.class);
+                intent.putExtra("UID",UID);
                 startActivity(intent);
             }
         });

@@ -403,7 +403,16 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         radio_music.setVisibility(View.GONE);
 
         Lable my_information=findViewById(R.id.personal_information);
-        my_information.setIv_lablephotoOnclickListener(new View.OnClickListener() {
+        Lable my_friend=findViewById(R.id.my_friend);
+
+        TextView lable,data,title;
+        lable=findViewById(R.id.new_friend_lable);
+        data=findViewById(R.id.new_friend_data);
+        title=findViewById(R.id.new_friend_title);
+        ImageView photo;
+        photo=findViewById(R.id.new_friend_photo);
+        //my_information.setNumber(13);
+        my_information.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(HomePageActivity.this, Information.class);
@@ -416,8 +425,8 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
             }
         });
 
-        Lable my_friend=findViewById(R.id.my_friend);
-        my_friend.setIv_lablephotoOnclickListener(new View.OnClickListener() {
+
+        my_friend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(HomePageActivity.this, friend.class);

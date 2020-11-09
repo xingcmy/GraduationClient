@@ -78,6 +78,9 @@ public class AddFriend extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_friend);
 
+        Intent intent=getIntent();
+        UID=intent.getStringExtra("UID");
+
         HoldTitle holdTitle=findViewById(R.id.add_friend_hold);
 
         friendId=findViewById(R.id.add_friend_id);
@@ -105,17 +108,23 @@ public class AddFriend extends Activity {
                 if (friend_id.equals("")||friend_id==null){
                     Toast.makeText(AddFriend.this,"请输入对方ID账号",Toast.LENGTH_LONG).show();
                 }else {
-                    try {
-                        String id=httpUtil.httpInformation(friend_id);
-                        Message message=new Message();
-                        message.obj=id;
-                        handler.sendMessage(message);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                String id=httpUtil.httpInformation(friend_id);
+                                Message message=new Message();
+                                message.obj=id;
+                                handler.sendMessage(message);
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+
                 }
             }
         });

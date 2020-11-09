@@ -151,6 +151,7 @@ public class Information extends Activity implements View.OnClickListener {
                 intent.putExtra("email",email);
                 intent.putExtra("city",city);
                 startActivity(intent);
+                Information.this.finish();
                 break;
         }
     }

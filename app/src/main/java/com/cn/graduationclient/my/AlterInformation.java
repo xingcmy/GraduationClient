@@ -19,6 +19,7 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
@@ -50,7 +51,6 @@ public class AlterInformation extends Activity {
 
     HttpUtil httpUtil=new HttpUtil();
 
-    Handler handler;
 
     String UID;
     String alter_data;
@@ -59,6 +59,23 @@ public class AlterInformation extends Activity {
 
 
     int year,month,day;
+
+    @SuppressLint("HandlerLeak")
+    Handler handler=new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 0x01:
+                    Toast.makeText(AlterInformation.this,"修改成功！",Toast.LENGTH_SHORT).show();
+                    AlterInformation.this.finish();
+                    break;
+                case 0x02:
+                    Toast.makeText(AlterInformation.this,"修改失败",Toast.LENGTH_SHORT).show();
+
+            }
+        }
+    };
     @SuppressLint("HandlerLeak")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,6 +102,7 @@ public class AlterInformation extends Activity {
         information_email.setTv_labletitle(email);
         information_profession.setTv_labletitle(profession);
         information_city.setTv_labletitle(city);
+        alter_data=birthday;
 
         information_hold.setIvbackOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,11 +128,15 @@ public class AlterInformation extends Activity {
                            String error=httpUtil.httpAlterInformation(UID,alter_name,alter_signature,alter_sex,alter_birthday,alter_profession,alter_city);
 
                            JSONObject jsonObject=new JSONObject(error);
-
+                           Message message=new Message();
                            if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
-                               Toast.makeText(AlterInformation.this,"修改成功！",Toast.LENGTH_SHORT).show();
-                               AlterInformation.this.finish();
+
+                               message.what=0x01;
+
+                           }else if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.FAILED)){
+                               message.what=0x02;
                            }
+                           handler.sendMessage(message);
                        } catch (IOException e) {
                            e.printStackTrace();
                        } catch (JSONException e) {
@@ -183,7 +205,7 @@ public class AlterInformation extends Activity {
         window.setBackgroundDrawable(new ColorDrawable(0));
         birthday_out.setView(inflate);
 
-        alter_data=birthday;
+        //alter_data=birthday;
 
         //birthday="2020.09.05";
 
@@ -191,7 +213,7 @@ public class AlterInformation extends Activity {
         DatePicker datePicker=inflate.findViewById(R.id.data_birthday);
 
         @SuppressLint("SimpleDateFormat")
-        Date formatter=new SimpleDateFormat("yyyy.MM.dd").parse(birthday);
+        Date formatter=new SimpleDateFormat("yyyy.MM.dd").parse(alter_data);
         //assert formatter != null;
         @SuppressLint("SimpleDateFormat")
         String data=new SimpleDateFormat("yyyyMMdd").format(formatter);
@@ -208,7 +230,19 @@ public class AlterInformation extends Activity {
                 AlterInformation.this.year=year;
                 AlterInformation.this.month=monthOfYear+1;
                 AlterInformation.this.day=dayOfMonth;
-                alter_data=AlterInformation.this.year+"."+AlterInformation.this.month+"."+AlterInformation.this.day;
+                if (AlterInformation.this.month<10||AlterInformation.this.day<10){
+                    if (AlterInformation.this.month<10&& AlterInformation.this.day<10){
+                        alter_data=AlterInformation.this.year+".0"+AlterInformation.this.month+".0"+AlterInformation.this.day;
+                    }else if (AlterInformation.this.day<10){
+                        alter_data=AlterInformation.this.year+"."+AlterInformation.this.month+".0"+AlterInformation.this.day;
+                    }else {
+                        alter_data=AlterInformation.this.year+".0"+AlterInformation.this.month+"."+AlterInformation.this.day;
+                    }
+
+                }else {
+                    alter_data=AlterInformation.this.year+"."+AlterInformation.this.month+"."+AlterInformation.this.day;
+                }
+
                 information_birthday.setTv_labletitle(alter_data);
                 birthday_out.dismiss();
             }

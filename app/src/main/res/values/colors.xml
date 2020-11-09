@@ -6,6 +6,7 @@
 
     <drawable name="white">#00000000</drawable>
     <drawable name="yellow">#fbfe81</drawable>
+    <color name="red">#DC143C</color>
     <drawable name="btncolor">#1a1a3c</drawable>
     <color name="sc_transparent">#00ffffff</color>
 

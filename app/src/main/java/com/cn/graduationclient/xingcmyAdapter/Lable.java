@@ -15,6 +15,8 @@ public class Lable extends RelativeLayout {
     TextView tv_lable,tv_labledata,tv_labletitle;
     ImageView iv_lablephoto;
 
+    int number;
+
     public Lable(Context context, AttributeSet attrs) {
         super(context, attrs);
         //初始化
@@ -31,13 +33,14 @@ public class Lable extends RelativeLayout {
         String title=typedArray.getString(R.styleable.Lable_name);
         int photo=typedArray.getResourceId(R.styleable.Lable_photo, R.drawable.ic_set);
         String data=typedArray.getString(R.styleable.Lable_data);
-        int number=typedArray.getInt(R.styleable.Lable_number,10);
+        number=typedArray.getInt(R.styleable.Lable_number,10);
 
         //赋值
         tv_lable.setText(lable);
         tv_labletitle.setText(title);
         tv_labledata.setText(data);
         iv_lablephoto.setImageResource(photo);
+        //number=anInt;
 
         //传入值
         if (number==10){
@@ -47,6 +50,10 @@ public class Lable extends RelativeLayout {
             tv_labledata.setVisibility(View.GONE);
             iv_lablephoto.setVisibility(View.VISIBLE);
         }else if (number==12){
+            tv_labledata.setVisibility(View.GONE);
+            iv_lablephoto.setVisibility(View.VISIBLE);
+            tv_labletitle.setVisibility(View.GONE);
+        }else if (number==13){
             tv_labledata.setVisibility(View.GONE);
             iv_lablephoto.setVisibility(View.VISIBLE);
             tv_labletitle.setVisibility(View.GONE);
@@ -67,6 +74,10 @@ public class Lable extends RelativeLayout {
 
     public void setTv_labletitle(String name){
         tv_labletitle.setText(name);
+    }
+
+    public void setNumber(int number){
+        this.number=number;
     }
 
     public String getTv_labletitle(){
