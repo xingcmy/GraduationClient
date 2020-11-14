@@ -60,7 +60,9 @@ import com.cn.graduationclient.chatroom.Appstart;
 import com.cn.graduationclient.cmd.StructureSystem;
 import com.cn.graduationclient.cmd.TypeSystem;
 import com.cn.graduationclient.constant.ContentFlag;
+import com.cn.graduationclient.db.FriendDbHelper;
 import com.cn.graduationclient.db.MessageDbHelper;
+import com.cn.graduationclient.homepage.HomePageActivity;
 import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.login.LoginActivity;
 import com.cn.graduationclient.tool.ExpressionUtil;
@@ -69,7 +71,9 @@ import com.cn.graduationclient.tool.SystemConstant;
 import com.cn.graduationclient.xingcmyAdapter.Chat;
 import com.cn.graduationclient.xingcmyAdapter.ChatAdapter;
 import com.cn.graduationclient.xingcmyAdapter.HoldTitle;
+import com.cn.graduationclient.xingcmyAdapter.MessageAdapter;
 import com.cn.graduationclient.xingcmyAdapter.TimeStampUtils;
+import com.cn.graduationclient.xingcmyAdapter.friendUItl;
 
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
@@ -101,10 +105,10 @@ public class FriendMessage extends AppCompatActivity {
     int imageIds[] = ExpressionUtil.getExpressRcIds();
 
     MessageDbHelper messageDbHelper;
-
-    SQLiteDatabase sqLiteDatabase;
+    FriendDbHelper friendDbHelper;
+    SQLiteDatabase sqLiteDatabase,sqLiteDatabase_friend;
     RecyclerView lv_message;
-    Cursor cursor;
+    Cursor cursor,cursor_friend;
 
     ChatAdapter chatAdapter;
    ArrayList<Chat> chatArrayList = new ArrayList<>();
@@ -135,6 +139,24 @@ public class FriendMessage extends AppCompatActivity {
                             //Toast.makeText(FriendMessage.this,message,Toast.LENGTH_SHORT).show();
                             String time=jsonObject.getString(StructureSystem.TIME);
                             int type=jsonObject.getInt(StructureSystem.TYPE);
+
+                            cursor_friend=sqLiteDatabase_friend.rawQuery("select * from friend where uid='"+UID+"' and friend='"+id+"'",null);
+                            if (cursor_friend.getCount()<=0){
+                                if (type==TypeSystem.MSG_IMAGE){
+                                    String img="图片";
+                                    sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+id+"','"+img+"','"+time+"',"+type+")");
+                                }else {
+                                    sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+id+"','"+message+"','"+time+"',"+type+")");
+                                }
+                            }else if (cursor_friend.getCount()>0){
+                                if (type==TypeSystem.MSG_IMAGE){
+                                    String img="图片";
+                                    sqLiteDatabase_friend.execSQL("update friend set msg='"+img+"',time='"+time+"',type="+type+" where uid='"+UID+"' and friend='"+id+"'");
+                                }else {
+                                    sqLiteDatabase_friend.execSQL("update friend set msg='"+message+"',time='"+time+"',type="+type+" where uid='"+UID+"' and friend='"+id+"'");
+                                }
+                            }
+
                             String filePath="";
                             if (type==TypeSystem.MSG_IMAGE){
                                 byte[] bytes=new MsgTool().StringToByte(message);
@@ -233,9 +255,13 @@ public class FriendMessage extends AppCompatActivity {
         setContentView(R.layout.friend_message);
 
         messageDbHelper=new MessageDbHelper(this);
+        friendDbHelper=new FriendDbHelper(this);
+
+        sqLiteDatabase_friend=friendDbHelper.getReadableDatabase();
 
         sqLiteDatabase=messageDbHelper.getReadableDatabase();
         Intent intent=getIntent();
+
         UID=intent.getStringExtra(StructureSystem.UID);
         id=intent.getStringExtra(StructureSystem.ID);
         name=intent.getStringExtra(StructureSystem.NAME);

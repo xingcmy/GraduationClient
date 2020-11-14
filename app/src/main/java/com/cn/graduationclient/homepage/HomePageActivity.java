@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -37,17 +38,25 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.cn.graduationclient.R;
 import com.cn.graduationclient.cmd.StructureSystem;
 import com.cn.graduationclient.cmd.TypeSystem;
+import com.cn.graduationclient.db.FriendDbHelper;
 import com.cn.graduationclient.db.MessageDbHelper;
 import com.cn.graduationclient.http.HttpUtil;
+import com.cn.graduationclient.message.FriendMessage;
 import com.cn.graduationclient.music.GetMusic;
 import com.cn.graduationclient.music.Music;
 import com.cn.graduationclient.music.MusicUtil;
 import com.cn.graduationclient.music.Random;
 import com.cn.graduationclient.my.Information;
 import com.cn.graduationclient.my.friend;
+import com.cn.graduationclient.tool.MsgTool;
+import com.cn.graduationclient.xingcmyAdapter.Chat;
+import com.cn.graduationclient.xingcmyAdapter.ChatAdapter;
 import com.cn.graduationclient.xingcmyAdapter.HoldTitle;
 import com.cn.graduationclient.xingcmyAdapter.Lable;
+import com.cn.graduationclient.xingcmyAdapter.MessageAdapter;
 import com.cn.graduationclient.xingcmyAdapter.MusicAdapter;
+import com.cn.graduationclient.xingcmyAdapter.friendUItl;
+import com.cn.graduationclient.xingcmyAdapter.friends;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,10 +77,12 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     LinearLayout radio_message,radio_music,radio_my;
     TextView lable,data,title;
     ImageView photo;
-    ListView listView;
+    ListView listView,listView_msg;
     MediaPlayer mediaPlayer;
     List<Music> lists;
+    List<friends> friendsList;
     MusicAdapter adapter;
+    MessageAdapter adapter_friend;
     Timer timer = new Timer();
     int index = 0;
     int legtht,back=0;
@@ -100,14 +111,39 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     HttpUtil httpUtil=new HttpUtil();
 
     String my_id,my_phone,my_email;
-    String UID,PHONE,EMAIL;
+    String UID,PHONE,EMAIL,NAME;
 
     MessageDbHelper messageDbHelper;
+    FriendDbHelper friendDbHelper;
 
-    SQLiteDatabase sqLiteDatabase;
+    SQLiteDatabase sqLiteDatabase,sqLiteDatabase_friend;
+    @SuppressLint("HandlerLeak")
+    Handler handler_friendName=new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 0x01:
+                    String friendName=(String)msg.obj;
+                    try {
+                        JSONObject jsonObject=new JSONObject(friendName);
+                        String Id=jsonObject.getString("Id");
+                        String name=jsonObject.getString("name");
+                        Intent intent=new Intent(HomePageActivity.this, FriendMessage.class);
+                        intent.putExtra(StructureSystem.UID,UID);
+                        intent.putExtra(StructureSystem.ID,Id);
+                        intent.putExtra(StructureSystem.NAME,name);
+                        startActivity(intent);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+            }
+        }
+    };
 
     @SuppressLint("HandlerLeak")
     Handler handler_msg=new Handler(){
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
@@ -120,6 +156,42 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                     String now=jsonObject.getString(StructureSystem.MSG);
                     int type=jsonObject.getInt(StructureSystem.TYPE);
                     String time=jsonObject.getString("time");
+                    cursor=sqLiteDatabase_friend.rawQuery("select * from friend where uid='"+UID+"' and friend='"+id+"'",null);
+                    if (cursor.getCount()<=0){
+                        if (type==TypeSystem.MSG_IMAGE){
+                            String img="图片";
+                            sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+id+"','"+img+"','"+time+"',"+type+")");
+                        }else {
+                            sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+id+"','"+now+"','"+time+"',"+type+")");
+                        }
+                    }else if (cursor.getCount()>0){
+                        if (type==TypeSystem.MSG_IMAGE){
+                            String img="图片";
+                            sqLiteDatabase_friend.execSQL("update friend set msg='"+img+"',time='"+time+"',type="+type+" where uid='"+UID+"' and friend='"+id+"'");
+                        }else {
+                            sqLiteDatabase_friend.execSQL("update friend set msg='"+now+"',time='"+time+"',type="+type+" where uid='"+UID+"' and friend='"+id+"'");
+                        }
+                    }
+                    friendsList=new friendUItl().getFriend(HomePageActivity.this,UID);
+                    adapter_friend=new MessageAdapter(friendsList,HomePageActivity.this);
+                    listView_msg.setAdapter(adapter_friend);
+
+                    String filePath="";
+                    if (type==TypeSystem.MSG_IMAGE){
+                        byte[] bytes=new MsgTool().StringToByte(now);
+
+                        filePath=new MsgTool().getFileByBytes(bytes,HomePageActivity.this.getExternalFilesDir(null).getPath(),id+"to"+UID+setTime(1)+".jpg");
+                        Toast.makeText(HomePageActivity.this,filePath,Toast.LENGTH_SHORT).show();
+                        Log.d("cs",filePath);
+                        if (filePath!=null||filePath!="") {
+
+                            sqLiteDatabase.execSQL("insert into message values('" + UID + "','" + id + "','" + id + "','" + filePath + "','" + time + "'," + type + ")");
+
+                        }
+                    }else if (type==TypeSystem.MSG_TEXT){
+                        sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+id+"','"+now+"','"+time+"',"+type+")");
+                    }
+
                     sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+id+"','"+now+"','"+time+"',"+type+")");
                     if (type==TypeSystem.ADD_FRIEND){
                         photo.setVisibility(View.VISIBLE);
@@ -146,8 +218,10 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                 permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
             } else {
                 messageDbHelper=new MessageDbHelper(this);
+                friendDbHelper=new FriendDbHelper(this);
 
                 sqLiteDatabase=messageDbHelper.getReadableDatabase();
+                sqLiteDatabase_friend=friendDbHelper.getReadableDatabase();
 
                 Intent intent=getIntent();
 
@@ -179,9 +253,6 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
             }
         }
 
-
-
-
     }
 
     @Override
@@ -211,12 +282,24 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
 
     public void onclickMessage(View view) {
         back=1;
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                new GetMsg().start();
+//            }
+//        }).start();
         onclickMessage();
     }
 
     @SuppressLint("HandlerLeak")
     public void onclickMusic(View view) {
         back=1;
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                new GetMsg().start();
+//            }
+//        }).start();
         radio_music.setVisibility(View.VISIBLE);
         radio_message.setVisibility(View.GONE);
         radio_my.setVisibility(View.GONE);
@@ -416,6 +499,12 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
 
     public void onclickMy(View view) {
         back=1;
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                new GetMsg().start();
+//            }
+//        }).start();
         radio_my.setVisibility(View.VISIBLE);
         radio_message.setVisibility(View.GONE);
         radio_music.setVisibility(View.GONE);
@@ -471,6 +560,41 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         radio_message.setVisibility(View.VISIBLE);
         radio_music.setVisibility(View.GONE);
         radio_my.setVisibility(View.GONE);
+
+        friendsList=new friendUItl().getFriend(this,UID);
+        adapter_friend=new MessageAdapter(friendsList,this);
+        listView_msg.setAdapter(adapter_friend);
+
+        listView_msg.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                String friendID=friendsList.get(position).getId();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Message message=new Message();
+                            String friendName=httpUtil.httpInformation(friendID);
+                            message.what=0x01;
+                            message.obj=friendName;
+                            handler_friendName.sendMessage(message);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
+            }
+        });
+
+
+    }
+
+    public String getFriendName(String id){
+
+        return null;
     }
 
     @Override
@@ -612,6 +736,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         image_view_play_toggle=findViewById(R.id.image_view_play_toggle);
 
         listView = findViewById(R.id.listView);
+        listView_msg=findViewById(R.id.home_list_msg);
 
         image_view_play_last.setImageResource(R.drawable.ic_remote_view_play_last);
         image_view_play_next.setImageResource(R.drawable.ic_remote_view_play_next);
@@ -653,6 +778,10 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        friendsList=new friendUItl().getFriend(this,UID);
+        adapter_friend=new MessageAdapter(friendsList,this);
+        listView_msg.setAdapter(adapter_friend);
 
         lists = new MusicUtil().getMusic(this);
         Log.i(TAG, "" + lists);
@@ -731,6 +860,27 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
             }
 
         }
+    }
+
+    public String setTime(int i){
+        String time="";
+        switch (i){
+            case 0:
+                @SuppressLint("SimpleDateFormat")
+                SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+                Date date = new Date(System.currentTimeMillis());
+                time=formatter.format(date);
+
+                break;
+            case 1:
+                @SuppressLint("SimpleDateFormat")
+                SimpleDateFormat formatter1= new SimpleDateFormat("yyyyMMddHHmmss");
+                Date date1 = new Date(System.currentTimeMillis());
+                time=formatter1.format(date1);
+                break;
+
+        }
+        return time;
     }
 
     public void SetList(){

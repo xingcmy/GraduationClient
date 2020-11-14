@@ -13,12 +13,14 @@ import java.util.List;
 
 public class MessageAdapter extends BaseAdapter {
 
-    private List<Message> messageList;
+    private List<friends> messageList;
     private Context context;
     //private MessageAdapter adapter;
    // private ImageView image_message_more;
 
-    public MessageAdapter(List<Message> messages, Context context) {
+    public MessageAdapter(){}
+
+    public MessageAdapter(List<friends> messages, Context context) {
         this.messageList = messages;
         this.context = context;
     }
@@ -48,18 +50,13 @@ public class MessageAdapter extends BaseAdapter {
             viewMessage.text_message_nowmessage=view.findViewById(R.id.text_message_nowmessage);
             viewMessage.text_message_time=view.findViewById(R.id.text_message_time);
             viewMessage.image_message_more=view.findViewById(R.id.image_message_more);
+            view.setTag(viewMessage);
         }else {
             viewMessage=(viewMessage) view.getTag();
         }
-        viewMessage.text_message_name.setText(messageList.get(i).getName());
-        viewMessage.text_message_nowmessage.setText(messageList.get(i).getNowmessage());
+        viewMessage.text_message_name.setText(messageList.get(i).getId());
+        viewMessage.text_message_nowmessage.setText(messageList.get(i).getMsg());
         viewMessage.text_message_time.setText(messageList.get(i).getTime());
-        viewMessage.image_message_more.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
         return view;
     }
     private class viewMessage{

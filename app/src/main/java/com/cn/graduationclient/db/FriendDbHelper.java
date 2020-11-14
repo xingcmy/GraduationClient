@@ -20,7 +20,7 @@ public class FriendDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String create_table="create table "+Friend_TABLE_NAME+"(uid verchar(11) not null,friend verchar(11) not null)";
+        String create_table="create table "+Friend_TABLE_NAME+"(uid verchar(11) not null,friend verchar(11) not null,msg verchar(10000),time verchar(45) not null,type int not null)";
         db.execSQL(create_table);
     }
 
