@@ -20,8 +20,9 @@ public class MessageDbHelper extends SQLiteOpenHelper {
 		String create_table = "create table " + MESSAGE_TABLE_NAME + " (" +MessageColumns.UID+ " verchar(11) not null,"
 				+ MessageColumns.ID + " verchar(11) not null,"
 				+ MessageColumns.SEND_PERSON + " verchar(11) not null,"
-				+ MessageColumns.SEND_CTN + " verchar(1000) not null,"
-				+ MessageColumns.SEND_DATE + " verchar(45) not null)";
+				+ MessageColumns.SEND_CTN + " verchar(10000) not null,"
+				+ MessageColumns.SEND_DATE + " verchar(45) not null,"
+				+MessageColumns.TYPE+" int not null)";
 		db.execSQL(create_table);
 	}
 
@@ -37,5 +38,6 @@ public class MessageDbHelper extends SQLiteOpenHelper {
 		public static final String SEND_CTN = "send_ctn";
 		public static final String SEND_DATE = "send_date";
 		public static final String SEND_PERSON = "send_person";
+		public static final String TYPE="type";
 	}
 }

@@ -71,4 +71,11 @@ public class HoldTitle extends RelativeLayout {
     public void setTvmoreOnClickListener(OnClickListener v) {
         tvmore.setOnClickListener(v);
     }
+
+    public void setTvtitle(String title){
+        tvtitle.setText(title);
+    }
+    public String getTvtitle(){
+        return tvtitle.getText().toString();
+    }
 }

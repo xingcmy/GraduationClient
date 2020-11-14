@@ -39,4 +39,6 @@ public class StructureSystem {
     public static final String ADD_FRIEND="addFriend";
     public static final String FRIEND_YES="yes";
     public static final String FRIEND_NO="no";
+
+    public final static String TIME="time";
 }

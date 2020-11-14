@@ -282,6 +282,7 @@ public class Register extends Activity implements View.OnClickListener {
                                 }else if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.FAILED)){
                                     message.what=0x03;
                                 }
+                                handler.sendMessage(message);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             } catch (JSONException e) {

@@ -2,12 +2,17 @@ package com.cn.graduationclient.login;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +21,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -26,6 +32,7 @@ import com.cn.graduationclient.homepage.HomePageActivity;
 import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.login.otherLogin.Email;
 import com.cn.graduationclient.login.otherLogin.Phone;
+import com.cn.graduationclient.tool.ExpressionUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,8 +54,18 @@ public class LoginActivity extends AppCompatActivity {
     HttpUtil httpUtil=new HttpUtil();
 
     @SuppressLint("HandlerLeak")
-    Handler handler;
-
+    Handler handler=new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 0x01:
+                    Toast.makeText(LoginActivity.this,"用户名/密码错误",Toast.LENGTH_LONG).show();
+                    break;
+            }
+        }
+    };
+    int imageIds[] = ExpressionUtil.getExpressRcIds();
 
     @SuppressLint("HandlerLeak")
     @Override
@@ -61,6 +78,7 @@ public class LoginActivity extends AppCompatActivity {
         login_button=findViewById(R.id.login_layout_button);
         login_text_forget=findViewById(R.id.login_text_forget);
         login_text_register=findViewById(R.id.login_text_register);
+
 
         login_text_forget.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -132,7 +150,10 @@ public class LoginActivity extends AppCompatActivity {
                                    startActivity(intent);
                                    LoginActivity.this.finish();
                                }else {
-                                   Toast.makeText(LoginActivity.this,"用户名/密码错误",Toast.LENGTH_LONG).show();
+                                   Message message=new Message();
+                                   message.what=0x01;
+                                   handler.sendMessage(message);
+                                  // Toast.makeText(LoginActivity.this,"用户名/密码错误",Toast.LENGTH_LONG).show();
                                }
 
                             } catch (IOException e) {

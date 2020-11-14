@@ -2,6 +2,7 @@ package com.cn.graduationclient.message;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -11,6 +12,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.Contacts;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.Spannable;
@@ -28,6 +31,7 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -45,6 +49,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
@@ -58,18 +64,24 @@ import com.cn.graduationclient.db.MessageDbHelper;
 import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.login.LoginActivity;
 import com.cn.graduationclient.tool.ExpressionUtil;
+import com.cn.graduationclient.tool.MsgTool;
 import com.cn.graduationclient.tool.SystemConstant;
+import com.cn.graduationclient.xingcmyAdapter.Chat;
+import com.cn.graduationclient.xingcmyAdapter.ChatAdapter;
+import com.cn.graduationclient.xingcmyAdapter.HoldTitle;
+import com.cn.graduationclient.xingcmyAdapter.TimeStampUtils;
 
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -91,41 +103,128 @@ public class FriendMessage extends AppCompatActivity {
     MessageDbHelper messageDbHelper;
 
     SQLiteDatabase sqLiteDatabase;
-    ListView lv_message;
+    RecyclerView lv_message;
     Cursor cursor;
 
+    ChatAdapter chatAdapter;
+   ArrayList<Chat> chatArrayList = new ArrayList<>();
     String path;
+    int type;
 
     @SuppressLint("HandlerLeak")
     Handler handler=new Handler(){
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             switch (msg.what){
                 case 0x00:
-                    setList();
+                    chatArrayList.add(new Chat(etCtn.getText().toString(),ChatAdapter.TYPE_SEND,id,TypeSystem.MSG_TEXT));
+                    chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
+                    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(FriendMessage.this);
+                    lv_message.setLayoutManager(linearLayoutManager);
+                    lv_message.setAdapter(chatAdapter);
                     break;
                 case 0x01:
                     String InMsg= (String) msg.obj;
                     try {
                         JSONObject jsonObject=new JSONObject(InMsg);
-                        String error=jsonObject.getString(StructureSystem.ERROR);
-                        if (error.equals(StructureSystem.SUCCESS)){
+                        if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
                             String send_id=jsonObject.getString(StructureSystem.ID);
                             String message=jsonObject.getString(StructureSystem.MSG);
-                            String time=jsonObject.getString("time");
+                            //Toast.makeText(FriendMessage.this,message,Toast.LENGTH_SHORT).show();
+                            String time=jsonObject.getString(StructureSystem.TIME);
+                            int type=jsonObject.getInt(StructureSystem.TYPE);
+                            String filePath="";
+                            if (type==TypeSystem.MSG_IMAGE){
+                                byte[] bytes=new MsgTool().StringToByte(message);
 
-                            sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+send_id+"','"+send_id+"','"+message+"','"+time+"')");
-                            setList();
+                                filePath=new MsgTool().getFileByBytes(bytes,FriendMessage.this.getExternalFilesDir(null).getPath(),id+"to"+UID+setTime(1)+".jpg");
+                                Toast.makeText(FriendMessage.this,filePath,Toast.LENGTH_SHORT).show();
+                                Log.d("cs",filePath);
+                                if (filePath!=null||filePath!="") {
+
+                                    sqLiteDatabase.execSQL("insert into message values('" + UID + "','" + send_id + "','" + send_id + "','" + filePath + "','" + time + "'," + type + ")");
+                                    chatArrayList.add(new Chat(filePath, ChatAdapter.TYPE_RECEIVE, id, TypeSystem.MSG_IMAGE));
+
+                                }
+                            }else if (type==TypeSystem.MSG_TEXT){
+                                    sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+send_id+"','"+send_id+"','"+message+"','"+time+"',"+type+")");
+                                    chatArrayList.add(new Chat(message,ChatAdapter.TYPE_RECEIVE,id,TypeSystem.MSG_TEXT));
+                                }
+
+                            chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
+                            LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(FriendMessage.this);
+                            lv_message.setLayoutManager(linearLayoutManager1);
+                            lv_message.setAdapter(chatAdapter);
                         }
+                        else if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.FAILED)){
+
+                        }
+
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                     break;
+                case 0x02:
+                    Toast.makeText(FriendMessage.this,"发送成功！",Toast.LENGTH_SHORT).show();
+                    chatArrayList.add(new Chat((String) msg.obj,ChatAdapter.TYPE_SEND,UID,TypeSystem.MSG_IMAGE));
+                    chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
+                    LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(FriendMessage.this);
+                    lv_message.setLayoutManager(linearLayoutManager1);
+                    lv_message.setAdapter(chatAdapter);
+                    break;
+                case 0x03:
+                    Toast.makeText(FriendMessage.this,"发送失败！",Toast.LENGTH_SHORT).show();
+                    break;
             }
 
 
+        }
+    };
+
+    @SuppressLint("HandlerLeak")
+    Handler pathHandler=new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if (msg.obj!=null||msg.obj!=""){
+                View view=getLayoutInflater().inflate(R.layout.file_path,null);
+                final AlertDialog.Builder ab=new AlertDialog.Builder(FriendMessage.this);
+                AlertDialog out=ab.create();
+                final Window window=out.getWindow();
+                window.setBackgroundDrawable(new ColorDrawable(0));
+                out.setView(view);
+                out.show();
+                HoldTitle holdTitle=view.findViewById(R.id.file_path_hold);
+                TextView textView=view.findViewById(R.id.text_file_path);
+                ImageView img=view.findViewById(R.id.file_path_img);
+                String filePath=(String)msg.obj;
+                Bitmap bitmap=new MsgTool().decodeSampleBitmap(img,filePath);
+                img.setImageBitmap(bitmap);
+                textView.setText(filePath);
+                holdTitle.setTvmoreOnClickListener(new View.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.O)
+                    @Override
+                    public void onClick(View v) {
+                        if (filePath!=null||filePath!=""){
+                            byte[] BFile =new MsgTool().getBytesByFile(filePath);
+                            String bytes=new MsgTool().ByteToString(BFile);
+                            FileMsg(bytes,filePath);
+                        }else {
+                            Toast.makeText(FriendMessage.this,"没有选择文件",Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
+                holdTitle.setIvbackOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        out.dismiss();
+                    }
+                });
+            }
         }
     };
     @Override
@@ -151,7 +250,7 @@ public class FriendMessage extends AppCompatActivity {
                 finish();
             }
         });
-        setList();
+       setList();
 
         new Thread(new Runnable() {
             @Override
@@ -183,13 +282,17 @@ public class FriendMessage extends AppCompatActivity {
                                 String cs=httpUtil.httpSendMsg(UID,id,ctn, TypeSystem.MSG_TEXT, TypeSystem.WRITE);
                                 Log.d("cs",cs);
                                 JSONObject jsonObject=new JSONObject(cs);
+                                Message message=new Message();
                                 if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
-                                    sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+UID+"','"+ctn+"','"+setTime()+"')");
+                                    sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+UID+"','"+ctn+"','"+setTime(0)+"',"+TypeSystem.MSG_TEXT+")");
 
-                                    Message message=new Message();
+
                                     message.what=0x00;
-                                    handler.sendMessage(message);
+                                    //handler.sendMessage(message);
+                                }else if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.FAILED)||cs==null||cs==""){
+                                    message.what=0x03;
                                 }
+                                handler.sendMessage(message);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             } catch (IOException e) {
@@ -201,6 +304,32 @@ public class FriendMessage extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public void FileMsg(String fileString,String path){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String fileReturn=httpUtil.httpSendMsg(UID,id,fileString,TypeSystem.MSG_IMAGE,TypeSystem.WRITE);
+                    JSONObject jsonObject=new JSONObject(fileReturn);
+                    Message message=new Message();
+                    if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
+                        sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+UID+"','"+path+"','"+setTime(0)+"',"+TypeSystem.MSG_IMAGE+")");
+                        message.what=0x02;
+                        message.obj=path;
+
+                    }else if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.FAILED)){
+                        message.what=0x03;
+                    }
+                    handler.sendMessage(message);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     public void hideSoftinput(View view){
@@ -289,11 +418,11 @@ public class FriendMessage extends AppCompatActivity {
         // 打开系统的文件选择器
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
-        //intent.setType(“image/*”);//选择图片
+            intent.setType("image/jpg");//选择图片
         // intent.setType(“audio/*”); //选择音频
         //intent.setType(“video/*”); //选择视频 （mp4 3gp 是android支持的视频格式）
         //intent.setType(“video/*;image/*”);//同时选择视频和图片
-            intent.setType("*/*");//无限制
+           // intent.setType("*/*");//无限制
             this.startActivityForResult(intent, REQUEST_CODE);
 
     }
@@ -302,21 +431,29 @@ public class FriendMessage extends AppCompatActivity {
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Message message=new Message();
         if (resultCode== Activity.RESULT_OK){
             Uri uri=data.getData();
             if ("file".equalsIgnoreCase(uri.getScheme())){
                 path=uri.getPath();
+                message.obj=path;
+                pathHandler.sendMessage(message);
                 return;
             }
             if (Build.VERSION.SDK_INT>Build.VERSION_CODES.KITKAT){
                 path=getPath(this,uri);
-                return;
             }else {
                 path=getRealPathFromURI(uri);
             }
+            message.obj=path;
+            pathHandler.sendMessage(message);
+            return;
         }
         if (data == null) {
             // 用户未选择任何文件，直接返回
+            path="";
+            message.obj=path;
+            pathHandler.sendMessage(message);
             return;
         }
         Uri uri = data.getData(); // 获取用户选择文件的URI
@@ -326,11 +463,15 @@ public class FriendMessage extends AppCompatActivity {
         if (cursor == null) {
             // 未查询到，说明为普通文件，可直接通过URI获取文件路径
             path = uri.getPath();
+            message.obj=path;
+            pathHandler.sendMessage(message);
             return;
         }
         if (cursor.moveToFirst()) {
             // 多媒体文件，从数据库中获取文件的真实路径
             path = cursor.getString(cursor.getColumnIndex("_data"));
+            message.obj=path;
+            pathHandler.sendMessage(message);
         }
         cursor.close();
     }
@@ -430,7 +571,7 @@ public class FriendMessage extends AppCompatActivity {
      * @return Whether the Uri authority is ExternalStorageProvider.
      */
     public boolean isExternalStorageDocument(Uri uri) {
-        return "com.android.externalstorage.documents".equals(uri.getAuthority());
+        return "com.android.external.storage.documents".equals(uri.getAuthority());
     }
 
     /**
@@ -525,11 +666,24 @@ public class FriendMessage extends AppCompatActivity {
         }
     }
 
-    public String setTime(){
-        @SuppressLint("SimpleDateFormat")
-        SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
-        Date date = new Date(System.currentTimeMillis());
-        String time=formatter.format(date);
+    public String setTime(int i){
+        String time="";
+        switch (i){
+            case 0:
+                @SuppressLint("SimpleDateFormat")
+                SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+                Date date = new Date(System.currentTimeMillis());
+                time=formatter.format(date);
+
+            break;
+            case 1:
+                @SuppressLint("SimpleDateFormat")
+                SimpleDateFormat formatter1= new SimpleDateFormat("yyyyMMddHHmmss");
+                Date date1 = new Date(System.currentTimeMillis());
+                time=formatter1.format(date1);
+                break;
+
+        }
         return time;
     }
 
@@ -545,45 +699,78 @@ public class FriendMessage extends AppCompatActivity {
         String[] name=new String[length];
         String[] message=new String[length];
         String[] time=new String[length];
-        if (length==0){
-
-        }else {
-            cursor.moveToNext();
-
-            for (int j=0;j<length;j++){
+        int [] type=new int[length];
+        if (length>0){
+            int j=0;
+            while (cursor.moveToNext()){
                 id[j]=cursor.getString(2);
                 name[j]=cursor.getString(2);
                 message[j]=cursor.getString(3);
                 time[j]=cursor.getString(4);
-                cursor.moveToNext();
+                type[j]=cursor.getInt(5);
+                j++;
             }
-
             for (int i=0;i<length;i++){
 
                 al = new HashMap<String, String>();
                 if (id[i].equals(UID)){
-                    al.put("id","");
-                    al.put("name",id[i]);
-                    al.put("message",message[i]);
-                    al.put("time",time[i]);
+                    chatArrayList.add(new Chat(message[i],ChatAdapter.TYPE_SEND,id[i],type[i]));
                 }else {
-                    al.put("id",id[i]);
-                    al.put("name","");
-                    al.put("message",message[i]);
-                    al.put("time",time[i]);
+                    chatArrayList.add(new Chat(message[i],ChatAdapter.TYPE_RECEIVE,id[i],type[i]));
                 }
 
-                photolist.add(al);
             }
+
         }
+        chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(FriendMessage.this);
+        lv_message.setLayoutManager(linearLayoutManager);
+        lv_message.setAdapter(chatAdapter);
+
+//        }else {
+//            cursor.moveToNext();
+//
+//            for (int j=0;j<length;j++){
+//                id[j]=cursor.getString(2);
+//                name[j]=cursor.getString(2);
+//                message[j]=cursor.getString(3);
+//                time[j]=cursor.getString(4);
+//                cursor.moveToNext();
+//            }
+//
+//            for (int i=0;i<length;i++){
+//
+//                al = new HashMap<String, String>();
+//                if (id[i].equals(UID)){
+//                    al.put("id","");
+//                    al.put("name",id[i]);
+//                    al.put("message",message[i]);
+//                    al.put("time",time[i]);
+//                }else {
+//                    al.put("id",id[i]);
+//                    al.put("name","");
+//                    al.put("message",message[i]);
+//                    al.put("time",time[i]);
+//                }
+//
+//                photolist.add(al);
+//            }
+//        }
 
 
         /*list=new SendMessageUtil().getsendmessage(this,id);
         Log.i(TAG, "" + list);*/
-        SimpleAdapter simpleAdapter=new SimpleAdapter(FriendMessage.this, photolist, R.layout.message,new String[]{"id","name","message","time"},new int[]{R.id.text_view_message_id,R.id.text_view_message_name, R.id.text_view_message_msg, R.id.text_view_message_time});
-        //adapter=new SendMessageAdapter(list,this);
-        lv_message.setAdapter(simpleAdapter);
+//        SimpleAdapter simpleAdapter=new SimpleAdapter(FriendMessage.this, photolist, R.layout.message,new String[]{"id","name","message","time"},new int[]{R.id.text_view_message_id,R.id.text_view_message_name, R.id.text_view_message_msg, R.id.text_view_message_time});
+//        //adapter=new SendMessageAdapter(list,this);
+//        lv_message.setAdapter(simpleAdapter);
 
+
+    }
+
+    public Bitmap smileB(int positon){
+        Bitmap bitmap = null;
+        bitmap = BitmapFactory.decodeResource(getResources(),imageIds[positon]);
+        return bitmap;
     }
 
 

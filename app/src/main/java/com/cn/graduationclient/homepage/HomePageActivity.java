@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -31,6 +32,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatSeekBar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.cn.graduationclient.R;
 import com.cn.graduationclient.cmd.StructureSystem;
@@ -64,14 +66,16 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     private static final String TAG ="XINGCMY";
     private static final int REQUEST_CODE_SOME_FEATURES_PERMISSIONS =1 ;
     LinearLayout radio_message,radio_music,radio_my;
-
+    TextView lable,data,title;
+    ImageView photo;
     ListView listView;
     MediaPlayer mediaPlayer;
     List<Music> lists;
     MusicAdapter adapter;
     Timer timer = new Timer();
     int index = 0;
-    int legtht;
+    int legtht,back=0;
+    Cursor cursor;
     int flog=0,flag=0,success=0,fsongrdm=0,songfoud=0;
     Random random=new Random();
     final int [] image=new int[]{R.drawable.ic_remote_view_play,R.drawable.ic_remote_view_pause};
@@ -114,8 +118,12 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                 if (error.equals(StructureSystem.SUCCESS)){
                     String id=jsonObject.getString(StructureSystem.ID);
                     String now=jsonObject.getString(StructureSystem.MSG);
+                    int type=jsonObject.getInt(StructureSystem.TYPE);
                     String time=jsonObject.getString("time");
-                    sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+id+"','"+now+"','"+time+"')");
+                    sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+id+"','"+now+"','"+time+"',"+type+")");
+                    if (type==TypeSystem.ADD_FRIEND){
+                        photo.setVisibility(View.VISIBLE);
+                    }
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -147,9 +155,16 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                 my_phone=intent.getStringExtra("phone");
                 my_email=intent.getStringExtra("email");
 
+                back=1;
                 getViewId();
                 getId();
                 onclickMessage();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new GetMsg().start();
+                    }
+                }).start();
             }
 
             if (hasReadPermission != PackageManager.PERMISSION_GRANTED) {
@@ -195,11 +210,13 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     }
 
     public void onclickMessage(View view) {
+        back=1;
         onclickMessage();
     }
 
     @SuppressLint("HandlerLeak")
     public void onclickMusic(View view) {
+        back=1;
         radio_music.setVisibility(View.VISIBLE);
         radio_message.setVisibility(View.GONE);
         radio_my.setVisibility(View.GONE);
@@ -398,6 +415,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     }
 
     public void onclickMy(View view) {
+        back=1;
         radio_my.setVisibility(View.VISIBLE);
         radio_message.setVisibility(View.GONE);
         radio_music.setVisibility(View.GONE);
@@ -405,12 +423,19 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         Lable my_information=findViewById(R.id.personal_information);
         Lable my_friend=findViewById(R.id.my_friend);
 
-        TextView lable,data,title;
+        ConstraintLayout xin_friend=findViewById(R.id.xin_friend);
         lable=findViewById(R.id.new_friend_lable);
         data=findViewById(R.id.new_friend_data);
         title=findViewById(R.id.new_friend_title);
-        ImageView photo;
         photo=findViewById(R.id.new_friend_photo);
+        cursor=sqLiteDatabase.rawQuery("select * from message where uid='"+UID+"'and type="+TypeSystem.ADD_FRIEND+"",null);
+        int lenght=cursor.getCount();
+        if (lenght<=0){
+            photo.setVisibility(View.GONE);
+        }else if (lenght>0){
+            photo.setVisibility(View.VISIBLE);
+        }
+
         //my_information.setNumber(13);
         my_information.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -432,6 +457,12 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                 Intent intent=new Intent(HomePageActivity.this, friend.class);
                 intent.putExtra("UID",UID);
                 startActivity(intent);
+            }
+        });
+        xin_friend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
     }
@@ -669,9 +700,14 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
         if (keyCode == event.KEYCODE_BACK) {
-            Toast.makeText(this, "后退键", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "再按一次退出", Toast.LENGTH_SHORT).show();
+            if (back==1){
+                back=0;
+            }else {
+                return super.onKeyDown(keyCode,event);
+            }
         }
-        return super.onKeyDown(keyCode, event);
+        return false;
     }
 
     class GetMsg extends Thread{

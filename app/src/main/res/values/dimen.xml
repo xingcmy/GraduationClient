@@ -24,6 +24,8 @@
         <dimen name="mp.text.list.hint">12sp</dimen>
         <!--<dimen name="mp.text.hint">12sp</dimen>-->
 
+        <dimen name="height_top_bar">50dp</dimen>
+
         <!-- Music -->
         <dimen name="xingcmy.music.album.size">260dp</dimen>
         <dimen name="xingcmy.music.seekBar.marginTop">50dp</dimen>

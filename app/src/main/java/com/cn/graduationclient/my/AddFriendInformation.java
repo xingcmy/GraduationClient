@@ -81,6 +81,13 @@ public class AddFriendInformation extends Activity {
             @Override
             public void onClick(View v) {
 
+                Intent intent=new Intent(AddFriendInformation.this,AddFriendMsg.class);
+                intent.putExtra("UID",UID);
+                intent.putExtra("id",id);
+                intent.putExtra("name",name);
+                intent.putExtra("sex",sex);
+                intent.putExtra("city",city);
+                startActivity(intent);
             }
         });
 
