@@ -15,4 +15,6 @@ public class TypeSystem {
     public final static int READ=111;
 
     public final static int ADD_FRIEND=11;
+    public final static int ADD_AGREE=12;
+    public final static int ADD_REFUSE=13;
 }

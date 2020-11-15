@@ -114,6 +114,7 @@ public class FriendMessage extends AppCompatActivity {
    ArrayList<Chat> chatArrayList = new ArrayList<>();
     String path;
     int type;
+    AlertDialog out;
 
     @SuppressLint("HandlerLeak")
     Handler handler=new Handler(){
@@ -128,6 +129,7 @@ public class FriendMessage extends AppCompatActivity {
                     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(FriendMessage.this);
                     lv_message.setLayoutManager(linearLayoutManager);
                     lv_message.setAdapter(chatAdapter);
+                    etCtn.setText("");
                     break;
                 case 0x01:
                     String InMsg= (String) msg.obj;
@@ -191,11 +193,20 @@ public class FriendMessage extends AppCompatActivity {
                     break;
                 case 0x02:
                     Toast.makeText(FriendMessage.this,"发送成功！",Toast.LENGTH_SHORT).show();
+                    cursor_friend=sqLiteDatabase_friend.rawQuery("select * from friend where uid='"+UID+"' and friend='"+id+"'",null);
+                    if (cursor_friend.getCount()<=0){
+                            String img="图片";
+                            sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+id+"','"+img+"','"+setTime(0)+"',"+TypeSystem.MSG_IMAGE+")");
+                    }else if (cursor_friend.getCount()>0){
+                            String img="图片";
+                            sqLiteDatabase_friend.execSQL("update friend set msg='"+img+"',time='"+setTime(0)+"',type="+TypeSystem.MSG_IMAGE+" where uid='"+UID+"' and friend='"+id+"'");
+                    }
                     chatArrayList.add(new Chat((String) msg.obj,ChatAdapter.TYPE_SEND,UID,TypeSystem.MSG_IMAGE));
                     chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
                     LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(FriendMessage.this);
                     lv_message.setLayoutManager(linearLayoutManager1);
                     lv_message.setAdapter(chatAdapter);
+                    out.dismiss();
                     break;
                 case 0x03:
                     Toast.makeText(FriendMessage.this,"发送失败！",Toast.LENGTH_SHORT).show();
@@ -214,7 +225,7 @@ public class FriendMessage extends AppCompatActivity {
             if (msg.obj!=null||msg.obj!=""){
                 View view=getLayoutInflater().inflate(R.layout.file_path,null);
                 final AlertDialog.Builder ab=new AlertDialog.Builder(FriendMessage.this);
-                AlertDialog out=ab.create();
+                out=ab.create();
                 final Window window=out.getWindow();
                 window.setBackgroundDrawable(new ColorDrawable(0));
                 out.setView(view);
@@ -312,6 +323,13 @@ public class FriendMessage extends AppCompatActivity {
                                 if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
                                     sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+UID+"','"+ctn+"','"+setTime(0)+"',"+TypeSystem.MSG_TEXT+")");
 
+
+                                    cursor_friend=sqLiteDatabase_friend.rawQuery("select * from friend where uid='"+UID+"' and friend='"+id+"'",null);
+                                    if (cursor_friend.getCount()<=0){
+                                        sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+id+"','"+ctn+"','"+setTime(0)+"',"+TypeSystem.MSG_TEXT+")");
+                                    }else if (cursor_friend.getCount()>0){
+                                        sqLiteDatabase_friend.execSQL("update friend set msg='"+ctn+"',time='"+setTime(0)+"',type="+TypeSystem.MSG_TEXT+" where uid='"+UID+"' and friend='"+id+"'");
+                                    }
 
                                     message.what=0x00;
                                     //handler.sendMessage(message);

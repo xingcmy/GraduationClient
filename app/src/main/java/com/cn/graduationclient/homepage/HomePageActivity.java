@@ -40,7 +40,9 @@ import com.cn.graduationclient.cmd.StructureSystem;
 import com.cn.graduationclient.cmd.TypeSystem;
 import com.cn.graduationclient.db.FriendDbHelper;
 import com.cn.graduationclient.db.MessageDbHelper;
+import com.cn.graduationclient.db.NewFriendFbhelper;
 import com.cn.graduationclient.http.HttpUtil;
+import com.cn.graduationclient.message.AgreeRefuse;
 import com.cn.graduationclient.message.FriendMessage;
 import com.cn.graduationclient.music.GetMusic;
 import com.cn.graduationclient.music.Music;
@@ -69,6 +71,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import kotlin.Suppress;
 
 public class HomePageActivity extends Activity implements View.OnClickListener {
 
@@ -115,8 +119,21 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
 
     MessageDbHelper messageDbHelper;
     FriendDbHelper friendDbHelper;
+    NewFriendFbhelper newFriendFbhelper;
 
-    SQLiteDatabase sqLiteDatabase,sqLiteDatabase_friend;
+    SQLiteDatabase sqLiteDatabase,sqLiteDatabase_friend,sqLiteDatabase_new;
+    @SuppressLint("HandlerLeak")
+    Handler handler_newMsg=new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            friendsList=new friendUItl().getFriend(HomePageActivity.this,UID);
+            if (friendsList!=null){
+                adapter_friend=new MessageAdapter(friendsList,HomePageActivity.this);
+                listView_msg.setAdapter(adapter_friend);
+            }
+        }
+    };
     @SuppressLint("HandlerLeak")
     Handler handler_friendName=new Handler(){
         @Override
@@ -161,6 +178,14 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                         if (type==TypeSystem.MSG_IMAGE){
                             String img="图片";
                             sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+id+"','"+img+"','"+time+"',"+type+")");
+                        }else if (type==TypeSystem.ADD_FRIEND){
+                            String newName="新朋友";
+                            Cursor c=cursor=sqLiteDatabase_friend.rawQuery("select * from friend where uid='"+UID+"' and friend='"+newName+"'",null);
+                            if (c.getCount()>0){
+                                sqLiteDatabase_friend.execSQL("update friend set msg='"+now+"',time='"+time+"',type="+type+" where uid='"+UID+"' and friend='"+newName+"'");
+                            }else if (c.getCount()<=0){
+                                sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+newName+"','"+now+"','"+time+"',"+type+")");
+                            }
                         }else {
                             sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+id+"','"+now+"','"+time+"',"+type+")");
                         }
@@ -168,6 +193,14 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                         if (type==TypeSystem.MSG_IMAGE){
                             String img="图片";
                             sqLiteDatabase_friend.execSQL("update friend set msg='"+img+"',time='"+time+"',type="+type+" where uid='"+UID+"' and friend='"+id+"'");
+                        }else if (type==TypeSystem.ADD_FRIEND){
+                            String newName="新朋友";
+                            Cursor c=cursor=sqLiteDatabase_friend.rawQuery("select * from friend where uid='"+UID+"' and friend='"+newName+"'",null);
+                            if (c.getCount()>0){
+                                sqLiteDatabase_friend.execSQL("update friend set msg='"+now+"',time='"+time+"',type="+type+" where uid='"+UID+"' and friend='"+newName+"'");
+                            }else if (c.getCount()<=0){
+                                sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+newName+"','"+now+"','"+time+"',"+type+")");
+                            }
                         }else {
                             sqLiteDatabase_friend.execSQL("update friend set msg='"+now+"',time='"+time+"',type="+type+" where uid='"+UID+"' and friend='"+id+"'");
                         }
@@ -192,9 +225,16 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                         sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+id+"','"+now+"','"+time+"',"+type+")");
                     }
 
-                    sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+id+"','"+now+"','"+time+"',"+type+")");
-                    if (type==TypeSystem.ADD_FRIEND){
+                    //sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+id+"','"+now+"','"+time+"',"+type+")");
+                   else if (type==TypeSystem.ADD_FRIEND){
                         photo.setVisibility(View.VISIBLE);
+                        Cursor c=sqLiteDatabase_new.rawQuery("select * from newfriend where uid='"+UID+"' and friend='"+id+"'",null);
+                        if (c.getCount()>0){
+                            sqLiteDatabase_new.execSQL("update newfriend set msg='"+now+"'where uid='"+UID+"' and friend='"+id+"'");
+                        }else if(c.getCount()<=0){
+                            sqLiteDatabase_new.execSQL("insert into newfriend values('"+UID+"','"+id+"','"+now+"')");
+                        }
+
                     }
                 }
             } catch (JSONException e) {
@@ -219,9 +259,11 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
             } else {
                 messageDbHelper=new MessageDbHelper(this);
                 friendDbHelper=new FriendDbHelper(this);
+                newFriendFbhelper=new NewFriendFbhelper(this);
 
                 sqLiteDatabase=messageDbHelper.getReadableDatabase();
                 sqLiteDatabase_friend=friendDbHelper.getReadableDatabase();
+                sqLiteDatabase_new=newFriendFbhelper.getReadableDatabase();
 
                 Intent intent=getIntent();
 
@@ -237,9 +279,18 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                     @Override
                     public void run() {
                         new GetMsg().start();
+                       // new NewMsg().start();
                     }
                 }).start();
+                friendsList=new friendUItl().getFriend(HomePageActivity.this,UID);
+                if (friendsList!=null){
+                    adapter_friend=new MessageAdapter(friendsList,HomePageActivity.this);
+                    listView_msg.setAdapter(adapter_friend);
+                }
             }
+
+
+
 
             if (hasReadPermission != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -288,6 +339,13 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
 //                new GetMsg().start();
 //            }
 //        }).start();
+        friendsList=new friendUItl().getFriend(HomePageActivity.this,UID);
+        if (friendsList!=null){
+            adapter_friend=new MessageAdapter(friendsList,HomePageActivity.this);
+            listView_msg.setAdapter(adapter_friend);
+        }
+
+
         onclickMessage();
     }
 
@@ -513,10 +571,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         Lable my_friend=findViewById(R.id.my_friend);
 
         ConstraintLayout xin_friend=findViewById(R.id.xin_friend);
-        lable=findViewById(R.id.new_friend_lable);
-        data=findViewById(R.id.new_friend_data);
-        title=findViewById(R.id.new_friend_title);
-        photo=findViewById(R.id.new_friend_photo);
+
         cursor=sqLiteDatabase.rawQuery("select * from message where uid='"+UID+"'and type="+TypeSystem.ADD_FRIEND+"",null);
         int lenght=cursor.getCount();
         if (lenght<=0){
@@ -551,7 +606,9 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         xin_friend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent=new Intent(HomePageActivity.this, AgreeRefuse.class);
+                intent.putExtra(StructureSystem.UID,UID);
+                startActivity(intent);
             }
         });
     }
@@ -568,24 +625,29 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         listView_msg.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (friendsList.get(position).getType()==TypeSystem.ADD_FRIEND){
 
-                String friendID=friendsList.get(position).getId();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Message message=new Message();
-                            String friendName=httpUtil.httpInformation(friendID);
-                            message.what=0x01;
-                            message.obj=friendName;
-                            handler_friendName.sendMessage(message);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                }else {
+                    String friendID=friendsList.get(position).getId();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Message message=new Message();
+                                String friendName=httpUtil.httpInformation(friendID);
+                                message.what=0x01;
+                                message.obj=friendName;
+                                handler_friendName.sendMessage(message);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                }).start();
+                    }).start();
+                }
+
+
             }
         });
 
@@ -767,6 +829,11 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
 
         button_play_mode_music_toggle=findViewById(R.id.button_play_mode_music_toggle);
 
+        lable=findViewById(R.id.new_friend_lable);
+        data=findViewById(R.id.new_friend_data);
+        title=findViewById(R.id.new_friend_title);
+        photo=findViewById(R.id.new_friend_photo);
+
         button_play_mode_music_toggle.setImageResource(music_mode_image[0]);
         button_view_music_toggle.setImageResource(music_image[0]);
         image_view_play_toggle.setImageResource(image[0]);
@@ -780,8 +847,11 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         }
 
         friendsList=new friendUItl().getFriend(this,UID);
-        adapter_friend=new MessageAdapter(friendsList,this);
-        listView_msg.setAdapter(adapter_friend);
+        if (friendsList!=null){
+            adapter_friend=new MessageAdapter(friendsList,this);
+            listView_msg.setAdapter(adapter_friend);
+        }
+
 
         lists = new MusicUtil().getMusic(this);
         Log.i(TAG, "" + lists);
@@ -845,6 +915,9 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
             super.run();
             while (true){
                 try {
+//                    friendsList=new friendUItl().getFriend(HomePageActivity.this,UID);
+//                    adapter_friend=new MessageAdapter(friendsList,HomePageActivity.this);
+//                    listView_msg.setAdapter(adapter_friend);
                     Thread.sleep(500);
                     Object msg=httpUtil.httpInMsg(UID, TypeSystem.READ);
                     Message message=new Message();
@@ -859,6 +932,24 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                 }
             }
 
+        }
+    }
+
+    class NewMsg extends Thread{
+        @Override
+        public void run() {
+            super.run();
+            while (true){
+                try {
+                    Thread.sleep(2000);
+                    Message message=new Message();
+                    handler_newMsg.sendMessage(message);
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
         }
     }
 

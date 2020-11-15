@@ -81,7 +81,7 @@ public class AddFriendMsg extends Activity {
             }
         });
 
-        holdTitle.setIvmoreOnClickListener(new View.OnClickListener() {
+        holdTitle.setTvmoreOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new Thread(new Runnable() {
@@ -91,6 +91,7 @@ public class AddFriendMsg extends Activity {
                             String friend=httpUtil.httpSendMsg(UID,id,msg.getText().toString(), TypeSystem.ADD_FRIEND,TypeSystem.WRITE);
                             Message message=new Message();
                             message.obj=friend;
+                            handler.sendMessage(message);
 
                         } catch (IOException e) {
                             e.printStackTrace();

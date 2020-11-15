@@ -40,6 +40,7 @@
         <activity android:name=".login.otherLogin.Phone"/>
         <activity android:name=".my.AddFriendInformation"/>
         <activity android:name=".my.AddFriendMsg"/>
+        <activity android:name=".message.AgreeRefuse"/>
     </application>
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
         tools:ignore="ProtectedPermissions" />

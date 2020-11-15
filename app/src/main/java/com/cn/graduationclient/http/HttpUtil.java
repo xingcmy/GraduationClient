@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class HttpUtil implements ClientHttp {
 
-    private static String str_url="http://192.168.1.101:8080/xingcmy/";
+    private static String str_url="http://192.168.1.105:8080/xingcmy/";
 
     @Override
     public HttpURLConnection http(String servlet) {
