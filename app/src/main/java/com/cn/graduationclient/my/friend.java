@@ -120,7 +120,7 @@ public class friend extends Activity {
                     id=new String[i];
                 }
                 String[]tion=(String[]) msg.obj;
-                Log.d("cs",tion[0]);
+               // Log.d("cs",tion[0]);
                 for (int j=0;j<i;j++){
                     JSONObject object= null;
                     try {
@@ -138,11 +138,12 @@ public class friend extends Activity {
                     }
                 }
 
+                if (i!=0){
+                    userList=new UserUtil().getUserInformation(friend.this,id,name,signature,sex,birthday,profession,email,city);
 
-                userList=new UserUtil().getUserInformation(friend.this,id,name,signature,sex,birthday,profession,email,city);
-
-                FriendAdapter adapter=new FriendAdapter(userList,friend.this);
-                friend_list.setAdapter(adapter);
+                    FriendAdapter adapter=new FriendAdapter(userList,friend.this);
+                    friend_list.setAdapter(adapter);
+                }
             }
         };
 

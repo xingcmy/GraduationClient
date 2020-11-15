@@ -172,6 +172,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                     String id=jsonObject.getString(StructureSystem.ID);
                     String now=jsonObject.getString(StructureSystem.MSG);
                     int type=jsonObject.getInt(StructureSystem.TYPE);
+                    Log.d("cs",type+"");
                     String time=jsonObject.getString("time");
                     cursor=sqLiteDatabase_friend.rawQuery("select * from friend where uid='"+UID+"' and friend='"+id+"'",null);
                     if (cursor.getCount()<=0){
@@ -186,6 +187,13 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                             }else if (c.getCount()<=0){
                                 sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+newName+"','"+now+"','"+time+"',"+type+")");
                             }
+                        }else if (type==TypeSystem.ADD_AGREE){
+                            String friend="快来一起聊天吧！";
+                            sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+id+"','"+friend+"','"+time+"',"+type+")");
+                        }else if (type==TypeSystem.ADD_REFUSE){
+                            String Name="通知";
+                            String MsgRefuse="你的好友请求被"+id+"拒绝了"+now;
+                            sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+Name+"','"+MsgRefuse+"','"+time+"',"+type+")");
                         }else {
                             sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+id+"','"+now+"','"+time+"',"+type+")");
                         }
@@ -232,7 +240,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                         if (c.getCount()>0){
                             sqLiteDatabase_new.execSQL("update newfriend set msg='"+now+"'where uid='"+UID+"' and friend='"+id+"'");
                         }else if(c.getCount()<=0){
-                            sqLiteDatabase_new.execSQL("insert into newfriend values('"+UID+"','"+id+"','"+now+"')");
+                            sqLiteDatabase_new.execSQL("insert into newfriend values('"+UID+"','"+id+"','"+now+"','null')");
                         }
 
                     }
@@ -625,9 +633,14 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         listView_msg.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //Toast.makeText(HomePageActivity.this,friendsList.get(position).getType(),Toast.LENGTH_SHORT).show();
+                Log.d("cs",friendsList.get(position).getType()+"");
                 if (friendsList.get(position).getType()==TypeSystem.ADD_FRIEND){
-
-                }else {
+                    Intent intent=new Intent(HomePageActivity.this, AgreeRefuse.class);
+                    intent.putExtra(StructureSystem.UID,UID);
+                    startActivity(intent);
+                }else //if (friendsList.get(position).getType()==TypeSystem.MSG_IMAGE||friendsList.get(position).getType()==TypeSystem.MSG_TEXT)
+                    {
                     String friendID=friendsList.get(position).getId();
                     new Thread(new Runnable() {
                         @Override

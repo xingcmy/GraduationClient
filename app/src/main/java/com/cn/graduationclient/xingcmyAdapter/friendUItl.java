@@ -23,7 +23,7 @@ public class friendUItl {
                 String name=cursor.getString(1);
                 String msg=cursor.getString(2);
                 String time=cursor.getString(3);
-                int type=cursor.getType(4);
+                int type=cursor.getInt(4);
                 friends friend=new friends(name,msg,time,type);
                 list.add(friend);
             }

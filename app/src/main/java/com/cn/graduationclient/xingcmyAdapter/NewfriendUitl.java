@@ -22,7 +22,8 @@ public class NewfriendUitl {
             while (cursor.moveToNext()){
                 String id=cursor.getString(1);
                 String msg=cursor.getString(2);
-                Newfriend newfriend=new Newfriend(id,msg);
+                String type=cursor.getString(3);
+                Newfriend newfriend=new Newfriend(id,msg,type);
                 list.add(newfriend);
             }
             return list;

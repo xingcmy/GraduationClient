@@ -3,11 +3,12 @@ package com.cn.graduationclient.xingcmyAdapter;
 public class Newfriend {
     private String id;
     private String msg;
+    public String type;
 
-    public Newfriend(String id,String msg){
+    public Newfriend(String id,String msg,String type){
         this.id=id;
         this.msg=msg;
-
+        this.type=type;
     }
 
 
@@ -27,5 +28,11 @@ public class Newfriend {
         this.msg = msg;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
 
+    public String getType() {
+        return type;
+    }
 }
