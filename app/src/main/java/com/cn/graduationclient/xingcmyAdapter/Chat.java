@@ -7,11 +7,12 @@ public class Chat {
     private String name;
     private int Msg_type;
 
-    public Chat(String message, int type, String name,int msg_type) {
+    public Chat(String message, int type, String name,int msg_type,String time) {
         this.message = message;
         this.type = type;
         this.name = name;
         this.Msg_type=msg_type;
+        this.time=time;
     }
 
     public String getMessage() {

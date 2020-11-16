@@ -2,17 +2,25 @@ package com.cn.graduationclient.my;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.cn.graduationclient.R;
+import com.cn.graduationclient.db.HeadDbHelper;
 import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.message.FriendMessage;
+import com.cn.graduationclient.tool.MsgTool;
 import com.cn.graduationclient.xingcmyAdapter.HoldTitle;
 import com.cn.graduationclient.xingcmyAdapter.Lable;
 
@@ -33,14 +41,21 @@ public class AddFriendInformation extends Activity {
     String friendId;
 
     Button add_friend,alter_information,sendMsg;
+    ImageView imageView;
 
     HttpUtil httpUtil=new HttpUtil();
+
+    HeadDbHelper headDbHelper;
+    SQLiteDatabase sqLiteDatabase;
 
     int num;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_friend_infromation);
+
+        headDbHelper=new HeadDbHelper(AddFriendInformation.this);
+        sqLiteDatabase=headDbHelper.getReadableDatabase();
 
         Intent intent=getIntent();
         UID=intent.getStringExtra("UID");
@@ -54,6 +69,7 @@ public class AddFriendInformation extends Activity {
         city=intent.getStringExtra("city");
 
         information_hold=findViewById(R.id.information_add_friend_hold);
+        imageView=findViewById(R.id.add_head);
         information_id=findViewById(R.id.information_add_friend_id);
         information_name=findViewById(R.id.information_add_friend_name);
         information_signature=findViewById(R.id.information_add_friend_signature);
@@ -76,6 +92,14 @@ public class AddFriendInformation extends Activity {
         information_email.setTv_labletitle(email);
 
         setButtonGoneOrVisible();
+
+        Cursor cursor=sqLiteDatabase.rawQuery("select * from head where uid='"+id+"'",null);
+        if (cursor.getCount()>0){
+            while (cursor.moveToNext()){
+                Bitmap bitmap=new MsgTool().decodeSampleBitmap(imageView,cursor.getString(1));
+                imageView.setImageBitmap(bitmap);
+            }
+        }
 
         add_friend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,6 +157,7 @@ public class AddFriendInformation extends Activity {
             sendMsg.setVisibility(View.VISIBLE);
         }else {
             new Thread(new Runnable() {
+                @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
                 public void run() {
                     try {
@@ -151,6 +176,20 @@ public class AddFriendInformation extends Activity {
                                 alter_information.setVisibility(View.GONE);
                                 sendMsg.setVisibility(View.VISIBLE);
                             }
+                        }
+                        String head=httpUtil.httpGetHead(id);
+                        JSONObject jsonObject=new JSONObject(head);
+                        String path=jsonObject.getString("path");
+                        String filePath="";
+                        byte[] bytes=new MsgTool().StringToByte(path);
+
+                        filePath=new MsgTool().getFileByBytes(bytes, AddFriendInformation.this.getExternalFilesDir(null).getPath(),id+".jpg");
+
+                        Cursor cursor=sqLiteDatabase.rawQuery("select * from head where uid='"+id+"'",null);
+                        if (cursor.getCount()<=0){
+                            sqLiteDatabase.execSQL("insert into head values('"+id+"','"+filePath+"')");
+                        }else if (cursor.getCount()>0){
+                            sqLiteDatabase.execSQL("update head set msg='"+filePath+"' where uid='"+id+"'");
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

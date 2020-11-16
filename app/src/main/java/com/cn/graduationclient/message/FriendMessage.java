@@ -124,7 +124,7 @@ public class FriendMessage extends AppCompatActivity {
             super.handleMessage(msg);
             switch (msg.what){
                 case 0x00:
-                    chatArrayList.add(new Chat(etCtn.getText().toString(),ChatAdapter.TYPE_SEND,id,TypeSystem.MSG_TEXT));
+                    chatArrayList.add(new Chat(etCtn.getText().toString(),ChatAdapter.TYPE_SEND,id,TypeSystem.MSG_TEXT,setTime(0)));
                     chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
                     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(FriendMessage.this);
                     lv_message.setLayoutManager(linearLayoutManager);
@@ -135,6 +135,7 @@ public class FriendMessage extends AppCompatActivity {
                     String InMsg= (String) msg.obj;
                     try {
                         JSONObject jsonObject=new JSONObject(InMsg);
+                        Log.d("cs",jsonObject+"");
                         if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
                             String send_id=jsonObject.getString(StructureSystem.ID);
                             String message=jsonObject.getString(StructureSystem.MSG);
@@ -169,12 +170,12 @@ public class FriendMessage extends AppCompatActivity {
                                 if (filePath!=null||filePath!="") {
 
                                     sqLiteDatabase.execSQL("insert into message values('" + UID + "','" + send_id + "','" + send_id + "','" + filePath + "','" + time + "'," + type + ")");
-                                    chatArrayList.add(new Chat(filePath, ChatAdapter.TYPE_RECEIVE, id, TypeSystem.MSG_IMAGE));
+                                    chatArrayList.add(new Chat(filePath, ChatAdapter.TYPE_RECEIVE, id, TypeSystem.MSG_IMAGE,time));
 
                                 }
                             }else if (type==TypeSystem.MSG_TEXT){
                                     sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+send_id+"','"+send_id+"','"+message+"','"+time+"',"+type+")");
-                                    chatArrayList.add(new Chat(message,ChatAdapter.TYPE_RECEIVE,id,TypeSystem.MSG_TEXT));
+                                    chatArrayList.add(new Chat(message,ChatAdapter.TYPE_RECEIVE,id,TypeSystem.MSG_TEXT,time));
                                 }
 
                             chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
@@ -201,7 +202,7 @@ public class FriendMessage extends AppCompatActivity {
                             String img="图片";
                             sqLiteDatabase_friend.execSQL("update friend set msg='"+img+"',time='"+setTime(0)+"',type="+TypeSystem.MSG_IMAGE+" where uid='"+UID+"' and friend='"+id+"'");
                     }
-                    chatArrayList.add(new Chat((String) msg.obj,ChatAdapter.TYPE_SEND,UID,TypeSystem.MSG_IMAGE));
+                    chatArrayList.add(new Chat((String) msg.obj,ChatAdapter.TYPE_SEND,UID,TypeSystem.MSG_IMAGE,setTime(0)));
                     chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
                     LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(FriendMessage.this);
                     lv_message.setLayoutManager(linearLayoutManager1);
@@ -758,9 +759,9 @@ public class FriendMessage extends AppCompatActivity {
 
                 al = new HashMap<String, String>();
                 if (id[i].equals(UID)){
-                    chatArrayList.add(new Chat(message[i],ChatAdapter.TYPE_SEND,id[i],type[i]));
+                    chatArrayList.add(new Chat(message[i],ChatAdapter.TYPE_SEND,id[i],type[i],time[i]));
                 }else {
-                    chatArrayList.add(new Chat(message[i],ChatAdapter.TYPE_RECEIVE,id[i],type[i]));
+                    chatArrayList.add(new Chat(message[i],ChatAdapter.TYPE_RECEIVE,id[i],type[i],time[i]));
                 }
 
             }

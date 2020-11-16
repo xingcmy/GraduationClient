@@ -12,7 +12,7 @@
 	        android:gravity="center_horizontal">
 	
 	        <TextView
-            android:id="@+id/tv_sendtime"
+            android:id="@+id/tv_right_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
@@ -32,7 +32,7 @@
 	        android:layout_marginRight="5dp" >
 	        
 	           <ImageView 
-	           android:id="@+id/iv_userhead" 
+	           android:id="@+id/is_my_head"
 	           android:layout_width="52dp"
 		       android:layout_height="52dp"
 	           android:focusable="false" 
@@ -44,7 +44,7 @@
 	            	android:layout_height="wrap_content"
 	            	android:background="@drawable/chatto_bg"
 	            	android:layout_marginRight="10dp"
-	            	android:layout_toLeftOf="@id/iv_userhead"
+	            	android:layout_toLeftOf="@id/is_my_head"
 	            	android:orientation="horizontal"
 	        		android:gravity="center_horizontal"
 	            	android:layout_marginLeft="30dp"
@@ -55,7 +55,7 @@
 	            	android:id="@+id/chat_msg_bg"
  				>
  					<TextView 
-	            		android:id="@+id/tv_chatcontent" 
+	            		android:id="@+id/right_msg"
 	           			android:layout_width="wrap_content"
 	            		android:layout_height="fill_parent"
 	            		android:gravity="center_vertical"
@@ -65,21 +65,20 @@
 	            		android:textColor="#ff000000"
 					/>
  					<ImageView
- 						android:id="@+id/iv_play_voice"
+						android:visibility="gone"
+ 						android:id="@+id/right_msg_img"
  						android:layout_marginLeft="2dp"
-						android:layout_width="wrap_content"
-	            		android:layout_height="wrap_content"
+						android:layout_width="100dp"
+	            		android:layout_height="100dp"
 	            		android:layout_gravity="center_vertical"
-	            		android:background="@drawable/chatto_voice_playing"
 					/>
  				</LinearLayout>
 	            <TextView 
-	            android:id="@+id/tv_username" 
+	            android:id="@+id/is_my"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:layout_below="@id/iv_userhead"
+	            android:layout_below="@id/is_my_head"
 	            android:layout_alignParentRight="true"
-	            
 	            android:textSize="15sp"
 	            android:gravity="center"
 	            android:textColor="@drawable/yellow"

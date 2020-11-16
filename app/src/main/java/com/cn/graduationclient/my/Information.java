@@ -3,19 +3,27 @@ package com.cn.graduationclient.my;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.cn.graduationclient.R;
+import com.cn.graduationclient.db.HeadDbHelper;
 import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.login.LoginActivity;
+import com.cn.graduationclient.tool.MsgTool;
 import com.cn.graduationclient.xingcmyAdapter.HoldTitle;
 import com.cn.graduationclient.xingcmyAdapter.Lable;
 
@@ -33,6 +41,7 @@ public class Information extends Activity implements View.OnClickListener {
     String id,name,signature,sex,birthday,profession,email,city;
 
     Button alter_information,send_message;
+    ImageView imageView;
 
     HttpUtil httpUtil=new HttpUtil();
 
@@ -40,17 +49,31 @@ public class Information extends Activity implements View.OnClickListener {
 
     String UID;
 
+    HeadDbHelper headDbHelper;
+    SQLiteDatabase sqLiteDatabase;
+
     @SuppressLint("HandlerLeak")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.my_information);
 
+        headDbHelper=new HeadDbHelper(Information.this);
+        sqLiteDatabase=headDbHelper.getReadableDatabase();
+
         Intent intent=getIntent();
         UID=intent.getStringExtra("UID");
         email=intent.getStringExtra("email");
         getViewId();
         Listener();
+
+        Cursor cursor=sqLiteDatabase.rawQuery("select * from head where uid='"+UID+"'",null);
+        if (cursor.getCount()>0){
+            while (cursor.moveToNext()){
+                Bitmap bitmap=new MsgTool().decodeSampleBitmap(imageView,cursor.getString(1));
+                imageView.setImageBitmap(bitmap);
+            }
+        }
 
         handler=new Handler(){
             @Override
@@ -83,10 +106,25 @@ public class Information extends Activity implements View.OnClickListener {
         };
 
         new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void run() {
                 try {
                     String msg=httpUtil.httpInformation(UID);
+                    String head=httpUtil.httpGetHead(UID);
+                    JSONObject jsonObject=new JSONObject(head);
+                    String path=jsonObject.getString("path");
+                    String filePath="";
+                    byte[] bytes=new MsgTool().StringToByte(path);
+
+                    filePath=new MsgTool().getFileByBytes(bytes, Information.this.getExternalFilesDir(null).getPath(),UID+".jpg");
+
+                    Cursor cursor=sqLiteDatabase.rawQuery("select * from head where uid='"+UID+"'",null);
+                    if (cursor.getCount()<=0){
+                        sqLiteDatabase.execSQL("insert into head values('"+UID+"','"+filePath+"')");
+                    }else if (cursor.getCount()>0){
+                        sqLiteDatabase.execSQL("update head set msg='"+filePath+"' where uid='"+UID+"'");
+                    }
                     Message message=handler.obtainMessage();
                     //message.what=0x01;
 
@@ -107,6 +145,7 @@ public class Information extends Activity implements View.OnClickListener {
     public void getViewId(){
         information_hold=findViewById(R.id.information_hold);
 
+        imageView=findViewById(R.id.information_my_head);
         information_id=findViewById(R.id.information_lable_id);
         information_id.setTv_labletitle(UID);
         information_name=findViewById(R.id.information_lable_name);

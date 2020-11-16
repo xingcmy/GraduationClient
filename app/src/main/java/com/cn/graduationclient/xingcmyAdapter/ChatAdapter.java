@@ -2,6 +2,8 @@ package com.cn.graduationclient.xingcmyAdapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.Spannable;
@@ -20,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import com.cn.graduationclient.R;
 import com.cn.graduationclient.cmd.TypeSystem;
+import com.cn.graduationclient.db.HeadDbHelper;
 import com.cn.graduationclient.message.FriendMessage;
 import com.cn.graduationclient.tool.ExpressionUtil;
 import com.cn.graduationclient.tool.MsgTool;
@@ -53,16 +56,20 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
         if(viewType==TYPE_SEND){
-            view= LayoutInflater.from(context).inflate(R.layout.item_send,parent,false);
+            view= LayoutInflater.from(context).inflate(R.layout.chat_item_right,parent,false);
             return new SendViewHolder(view);
         }else{
-            view= LayoutInflater.from(context).inflate(R.layout.item_receive,parent,false);
+            view= LayoutInflater.from(context).inflate(R.layout.chat_item_left,parent,false);
             return new ReceiveViewHolder(view);
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+
+
+        HeadDbHelper headDbHelper=new HeadDbHelper(context);
+        SQLiteDatabase sqLiteDatabase=headDbHelper.getReadableDatabase();
         if(holder instanceof SendViewHolder){
             SendViewHolder viewHolder= (SendViewHolder) holder;
 
@@ -94,6 +101,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 //                    }
 //                }
 //            }
+
+            Cursor right_cursor=sqLiteDatabase.rawQuery("select * from head where uid='"+chatArrayList.get(position).getName()+"'",null);
+            if (right_cursor.getCount()>=0){
+                while (right_cursor.moveToNext()){
+                    Bitmap bitmap=new MsgTool().decodeSampleBitmap(viewHolder.right_head,right_cursor.getString(1));
+                    viewHolder.right_head.setImageBitmap(bitmap);
+                }
+
+            }
+            viewHolder.right_time.setText(chatArrayList.get(position).getTime());
             if (chatArrayList.get(position).getMsg_type()== TypeSystem.MSG_TEXT){
                 viewHolder.textView_send.setVisibility(View.VISIBLE);
                 viewHolder.right_img.setVisibility(View.GONE);
@@ -141,6 +158,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 //                    }
 //                }
 //            }
+            Cursor left_cursor=sqLiteDatabase.rawQuery("select * from head where uid='"+chatArrayList.get(position).getName()+"'",null);
+            if (left_cursor.getCount()>=0){
+                while (left_cursor.moveToNext()){
+                    Bitmap bitmap=new MsgTool().decodeSampleBitmap(viewHolder.left_head,left_cursor.getString(1));
+                    viewHolder.left_head.setImageBitmap(bitmap);
+                }
+            }
+            viewHolder.left_time.setText(chatArrayList.get(position).getTime());
             if (chatArrayList.get(position).getMsg_type()==TypeSystem.MSG_TEXT){
                 viewHolder.left_img.setVisibility(View.GONE);
                 viewHolder.textView_receive.setVisibility(View.VISIBLE);
@@ -168,26 +193,30 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     }
 
     private class SendViewHolder extends RecyclerView.ViewHolder {
-        private TextView textView_send,my;
-        private ImageView right_img;
+        private TextView textView_send,my,right_time;
+        private ImageView right_img,right_head;
 
         public SendViewHolder(View itemView) {
             super(itemView);
             textView_send = itemView.findViewById(R.id.right_msg);
-            my=itemView.findViewById(R.id.text_id_my);
+            my=itemView.findViewById(R.id.is_my);
             right_img=itemView.findViewById(R.id.right_msg_img);
+            right_time=itemView.findViewById(R.id.tv_right_time);
+            right_head=itemView.findViewById(R.id.is_my_head);
         }
     }
 
     private class ReceiveViewHolder extends RecyclerView.ViewHolder {
-        private TextView textView_receive,your;
-        private ImageView left_img;
+        private TextView textView_receive,your,left_time;
+        private ImageView left_img,left_head;
 
         public ReceiveViewHolder(View itemView) {
             super(itemView);
             textView_receive = itemView.findViewById(R.id.left_msg);
-            your=itemView.findViewById(R.id.text_is_your);
+            your=itemView.findViewById(R.id.is_your);
             left_img=itemView.findViewById(R.id.left_msg_img);
+            left_time=itemView.findViewById(R.id.tv_left_time);
+            left_head=itemView.findViewById(R.id.is_your_head);
         }
     }
 }

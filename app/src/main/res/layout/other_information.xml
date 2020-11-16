@@ -16,6 +16,12 @@
             android:layout_height="wrap_content"
             app:title="详细信息"
             app:type="10"/>
+        <ImageView
+            android:id="@+id/information_other_head"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:src="@mipmap/xing"/>
         <com.cn.graduationclient.xingcmyAdapter.Lable
             android:id="@+id/information_lable_other_id"
             android:layout_width="match_parent"

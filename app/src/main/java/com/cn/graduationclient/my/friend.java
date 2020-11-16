@@ -5,6 +5,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,12 +17,16 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.cn.graduationclient.R;
+import com.cn.graduationclient.db.HeadDbHelper;
+import com.cn.graduationclient.homepage.HomePageActivity;
 import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.my.other.Information;
 import com.cn.graduationclient.my.other.User;
 import com.cn.graduationclient.my.other.UserUtil;
+import com.cn.graduationclient.tool.MsgTool;
 import com.cn.graduationclient.xingcmyAdapter.FriendAdapter;
 import com.cn.graduationclient.xingcmyAdapter.HoldTitle;
 
@@ -67,6 +74,7 @@ public class friend extends Activity {
         UID=intent.getStringExtra("UID");
 
         new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void run() {
                 try {
@@ -87,6 +95,27 @@ public class friend extends Activity {
 
                     for (int j=0;j<num;j++){
                         String mation=httpUtil.httpInformation(FI[j]);
+                        String head=httpUtil.httpGetHead(FI[j]);
+                        JSONObject jsonObject=new JSONObject(head);
+                        String path=jsonObject.getString("path");
+                        HeadDbHelper headDbHelper=new HeadDbHelper(friend.this);
+                        SQLiteDatabase sqLiteDatabase=headDbHelper.getReadableDatabase();
+                        String filePath="";
+                        byte[] bytes=new MsgTool().StringToByte(path);
+
+                        filePath=new MsgTool().getFileByBytes(bytes, friend.this.getExternalFilesDir(null).getPath(),FI[j]+".jpg");
+                        Log.d("cs",filePath);
+
+                        if (filePath!=null||filePath!=""){
+                            Cursor cursor=sqLiteDatabase.rawQuery("select * from head where uid='"+FI[j]+"'",null);
+                            if (cursor.getCount()<=0){
+                                sqLiteDatabase.execSQL("insert into head values('"+FI[j]+"','"+filePath+"')");
+                            }else if (cursor.getCount()>0){
+                                sqLiteDatabase.execSQL("update head set msg='"+filePath+"' where uid='"+FI[j]+"'");
+                            }
+                        }
+
+
                         information[j]=mation;
                         Log.d("cs"+j,mation);
 

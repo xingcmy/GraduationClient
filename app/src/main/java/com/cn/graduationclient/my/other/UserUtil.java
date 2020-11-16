@@ -19,6 +19,19 @@ import java.util.List;
 
 public class UserUtil {
 
+    /**
+     *
+     * @param context
+     * @param id 好友id
+     * @param name 好友昵称
+     * @param signature 好友签名
+     * @param sex 好友性别
+     * @param birthday 好友生日
+     * @param profession 好友职业
+     * @param email 好友职业
+     * @param city 好友地址
+     * @return 好友列表
+     */
     public static List<User> getUserInformation(Context context,String[] id,String[] name,String[] signature,String[] sex,String[] birthday,String[] profession,String[] email,String[] city){
 
         List<User> lists=new ArrayList<>();

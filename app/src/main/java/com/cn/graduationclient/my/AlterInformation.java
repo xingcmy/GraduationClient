@@ -2,31 +2,49 @@ package com.cn.graduationclient.my;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 
 import com.cn.graduationclient.R;
 import com.cn.graduationclient.cmd.StructureSystem;
+import com.cn.graduationclient.cmd.TypeSystem;
+import com.cn.graduationclient.db.HeadDbHelper;
 import com.cn.graduationclient.http.HttpUtil;
+import com.cn.graduationclient.message.FriendMessage;
 import com.cn.graduationclient.my.city.ProvinceCity;
+import com.cn.graduationclient.tool.MsgTool;
 import com.cn.graduationclient.xingcmyAdapter.EditLa;
 import com.cn.graduationclient.xingcmyAdapter.HoldTitle;
 import com.cn.graduationclient.xingcmyAdapter.Lable;
@@ -41,11 +59,13 @@ import java.util.Date;
 
 public class AlterInformation extends Activity {
 
+    private static final int REQUEST_CODE = 1;
     HoldTitle information_hold;
 
     Lable information_id,information_sex,information_birthday,information_profession,information_email,information_city;
 
     EditLa information_name,information_signature;
+    ImageView imageView;
     String id,name,signature,sex,birthday,profession,email,city;
 
 
@@ -59,6 +79,56 @@ public class AlterInformation extends Activity {
 
 
     int year,month,day;
+    String path;
+
+    HeadDbHelper headDbHelper;
+    SQLiteDatabase sqLiteDatabase;
+
+    android.app.AlertDialog out;
+
+    @SuppressLint("HandlerLeak")
+    Handler pathHandler=new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if (msg.obj!=null||msg.obj!=""){
+                View view=getLayoutInflater().inflate(R.layout.file_path,null);
+                final android.app.AlertDialog.Builder ab=new android.app.AlertDialog.Builder(AlterInformation.this);
+                out=ab.create();
+                final Window window=out.getWindow();
+                window.setBackgroundDrawable(new ColorDrawable(0));
+                out.setView(view);
+                out.show();
+                HoldTitle holdTitle=view.findViewById(R.id.file_path_hold);
+                TextView textView=view.findViewById(R.id.text_file_path);
+                ImageView img=view.findViewById(R.id.file_path_img);
+                String filePath=(String)msg.obj;
+                Bitmap bitmap=new MsgTool().decodeSampleBitmap(img,filePath);
+                img.setImageBitmap(bitmap);
+                textView.setText(filePath);
+                holdTitle.setTvmoreOnClickListener(new View.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.O)
+                    @Override
+                    public void onClick(View v) {
+                        if (filePath!=null||filePath!=""){
+                            byte[] BFile =new MsgTool().getBytesByFile(filePath);
+                            String bytes=new MsgTool().ByteToString(BFile);
+                            FileMsg(bytes,filePath);
+                        }else {
+                            Toast.makeText(AlterInformation.this,"没有选择文件",Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
+                holdTitle.setIvbackOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        out.dismiss();
+                    }
+                });
+            }
+        }
+    };
 
     @SuppressLint("HandlerLeak")
     Handler handler=new Handler(){
@@ -72,6 +142,13 @@ public class AlterInformation extends Activity {
                     break;
                 case 0x02:
                     Toast.makeText(AlterInformation.this,"修改失败",Toast.LENGTH_SHORT).show();
+                    break;
+                case 0x03:
+                    String alter_path=(String) msg.obj;
+                    Bitmap bitmap=new MsgTool().decodeSampleBitmap(imageView,alter_path);
+                    imageView.setImageBitmap(bitmap);
+                    Toast.makeText(AlterInformation.this,"修改成功！",Toast.LENGTH_SHORT).show();
+                    break;
 
             }
         }
@@ -81,6 +158,9 @@ public class AlterInformation extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.alter_information);
+
+        headDbHelper=new HeadDbHelper(AlterInformation.this);
+        sqLiteDatabase=headDbHelper.getReadableDatabase();
 
         Intent intent=getIntent();
 
@@ -94,6 +174,13 @@ public class AlterInformation extends Activity {
         city=intent.getStringExtra("city");
 
         getViewId();
+        Cursor cursor=sqLiteDatabase.rawQuery("select * from head where uid='"+UID+"'",null);
+        if (cursor.getCount()>0){
+            while (cursor.moveToNext()){
+                Bitmap bitmap=new MsgTool().decodeSampleBitmap(imageView,cursor.getString(1));
+                imageView.setImageBitmap(bitmap);
+            }
+        }
 
         information_name.setTv_labletitle(name);
         information_signature.setTv_labletitle(signature);
@@ -152,6 +239,7 @@ public class AlterInformation extends Activity {
     public void getViewId(){
         information_hold=findViewById(R.id.el_hold);
 
+        imageView=findViewById(R.id.alter_information_head);
         information_id=findViewById(R.id.information_el_id);
         information_id.setTv_labletitle(UID);
         information_name=findViewById(R.id.information_el_name);
@@ -164,6 +252,9 @@ public class AlterInformation extends Activity {
 
     }
 
+    /**
+     * 修改信息
+     */
     public void alter_onclick(){
         information_birthday.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -196,6 +287,10 @@ public class AlterInformation extends Activity {
         });
     }
 
+    /**
+     * 生日
+     * @throws ParseException
+     */
     public void alter_birthday() throws ParseException {
 
         View inflate = getLayoutInflater().inflate(R.layout.birthday_information, null);
@@ -259,6 +354,9 @@ public class AlterInformation extends Activity {
 
     }
 
+    /**
+     * 性别
+     */
     public void alter_sex(){
         View view=getLayoutInflater().inflate(R.layout.sex_information,null);
         final AlertDialog.Builder ab=new AlertDialog.Builder(this);
@@ -408,5 +506,202 @@ public class AlterInformation extends Activity {
             }
         });
 
+    }
+
+    public void onclickHead(View view) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/jpg");//选择图片
+        // intent.setType(“audio/*”); //选择音频
+        //intent.setType(“video/*”); //选择视频 （mp4 3gp 是android支持的视频格式）
+        //intent.setType(“video/*;image/*”);//同时选择视频和图片
+        // intent.setType("*/*");//无限制
+        this.startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    protected void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Message message=new Message();
+        if (resultCode== Activity.RESULT_OK){
+            Uri uri=data.getData();
+            if ("file".equalsIgnoreCase(uri.getScheme())){
+                path=uri.getPath();
+                message.obj=path;
+                pathHandler.sendMessage(message);
+                return;
+            }
+            if (Build.VERSION.SDK_INT>Build.VERSION_CODES.KITKAT){
+                path=getPath(this,uri);
+            }else {
+                path=getRealPathFromURI(uri);
+            }
+            message.obj=path;
+            pathHandler.sendMessage(message);
+            return;
+        }
+        if (data == null) {
+            // 用户未选择任何文件，直接返回
+            path="";
+            message.obj=path;
+            pathHandler.sendMessage(message);
+            return;
+        }
+        Uri uri = data.getData(); // 获取用户选择文件的URI
+        // 通过ContentProvider查询文件路径
+        ContentResolver resolver = this.getContentResolver();
+        Cursor cursor = resolver.query(uri, null, null, null, null);
+        if (cursor == null) {
+            // 未查询到，说明为普通文件，可直接通过URI获取文件路径
+            path = uri.getPath();
+            message.obj=path;
+            pathHandler.sendMessage(message);
+            return;
+        }
+        if (cursor.moveToFirst()) {
+            // 多媒体文件，从数据库中获取文件的真实路径
+            path = cursor.getString(cursor.getColumnIndex("_data"));
+            message.obj=path;
+            pathHandler.sendMessage(message);
+        }
+        cursor.close();
+    }
+
+
+    public String getRealPathFromURI(Uri contentUri) {
+        String res = null;
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
+        if(null!=cursor&&cursor.moveToFirst()){;
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            res = cursor.getString(column_index);
+            cursor.close();
+        }
+        return res;
+    }
+
+    @SuppressLint("NewApi")
+    public String getPath(final Context context, final Uri uri) {
+
+        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+
+        // DocumentProvider
+        // ExternalStorageProvider
+        if (isExternalStorageDocument(uri)) {
+            final String docId = DocumentsContract.getDocumentId(uri);
+            final String[] split = docId.split(":");
+            final String type = split[0];
+
+            if ("primary".equalsIgnoreCase(type)) {
+                return Environment.getExternalStorageDirectory() + "/" + split[1];
+            }
+        }
+        // DownloadsProvider
+        else if (isDownloadsDocument(uri)) {
+
+            final String id = DocumentsContract.getDocumentId(uri);
+            final Uri contentUri = ContentUris.withAppendedId(
+                    Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+
+            return getDataColumn(context, contentUri, null, null);
+        }
+        // MediaProvider
+        else if (isMediaDocument(uri)) {
+            final String docId = DocumentsContract.getDocumentId(uri);
+            final String[] split = docId.split(":");
+            final String type = split[0];
+
+            Uri contentUri = null;
+            if ("image".equals(type)) {
+                contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            } else if ("video".equals(type)) {
+                contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+            } else if ("audio".equals(type)) {
+                contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+            }
+
+            final String selection = "_id=?";
+            final String[] selectionArgs = new String[]{split[1]};
+
+            return getDataColumn(context, contentUri, selection, selectionArgs);
+        } else if ("content".equalsIgnoreCase(uri.getScheme())) {
+            return getDataColumn(context, uri, null, null);
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+        return null;
+    }
+
+
+
+
+
+    public String getDataColumn(Context context, Uri uri, String selection,
+                                String[] selectionArgs) {
+
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = {column};
+
+        try {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
+                    null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int column_index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(column_index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is ExternalStorageProvider.
+     */
+    public boolean isExternalStorageDocument(Uri uri) {
+        return "com.android.external.storage.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is DownloadsProvider.
+     */
+    public boolean isDownloadsDocument(Uri uri) {
+        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is MediaProvider.
+     */
+    public boolean isMediaDocument(Uri uri) {
+        return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+    public void FileMsg(String fileString,String path){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String fileReturn=httpUtil.httpSetHead(UID,fileString);
+                    JSONObject jsonObject=new JSONObject(fileReturn);
+                    Message message=new Message();
+                    if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
+                        message.what=0x03;
+                        message.obj=path;
+
+                    }else if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.FAILED)){
+                        message.what=0x02;
+                    }
+                    handler.sendMessage(message);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }

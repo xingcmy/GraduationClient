@@ -18,4 +18,6 @@ public interface ClientHttp {
     Object httpInMsg(String UID, int read) throws IOException, JSONException;
     String httpAlterInformation(String uid, String name, String signature, String sex,
                                 String birthday, String profession, String city) throws IOException, JSONException;
+    String httpSetHead(String id,String head) throws IOException;
+    String httpGetHead(String id) throws IOException, JSONException;
 }

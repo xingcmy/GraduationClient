@@ -353,4 +353,52 @@ public class HttpUtil implements ClientHttp {
         }
         return null;
     }
+
+    @Override
+    public String httpGetHead(String id) throws IOException, JSONException {
+
+        HttpURLConnection httpURLConnection=http("GetHead");
+        OutputStream outputStream=httpURLConnection.getOutputStream();
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
+
+        JSONObject jsonObject=new JSONObject();
+        jsonObject.put(StructureSystem.UID,id);
+
+        objectOutputStream.writeObject(jsonObject.toString());
+        objectOutputStream.flush();
+        objectOutputStream.close();
+
+        InputStreamReader reader=new InputStreamReader(httpURLConnection.getInputStream());
+
+        BufferedReader bufferedReader=new BufferedReader(reader);
+        String line="";
+        if ((line=bufferedReader.readLine())!=null){
+            return line;
+        }
+        return null;
+    }
+
+    @Override
+    public String httpSetHead(String id,String head) throws IOException {
+        HttpURLConnection httpURLConnection=http("AlterHead");
+        OutputStream outputStream=httpURLConnection.getOutputStream();
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
+
+        MessageUtil messageUtil=new MessageUtil();
+        messageUtil.setSender(id);
+        messageUtil.setMsg(head);
+
+        objectOutputStream.writeObject(JSONUtil.ObjectToJson(messageUtil));
+        objectOutputStream.flush();
+        objectOutputStream.close();
+
+        InputStreamReader reader=new InputStreamReader(httpURLConnection.getInputStream());
+
+        BufferedReader bufferedReader=new BufferedReader(reader);
+        String line="";
+        if ((line=bufferedReader.readLine())!=null){
+            return line;
+        }
+        return null;
+    }
 }

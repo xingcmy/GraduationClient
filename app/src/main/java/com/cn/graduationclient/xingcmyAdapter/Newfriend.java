@@ -5,6 +5,12 @@ public class Newfriend {
     private String msg;
     public String type;
 
+    /**
+     *
+     * @param id 账号
+     * @param msg 消息
+     * @param type 状态
+     */
     public Newfriend(String id,String msg,String type){
         this.id=id;
         this.msg=msg;
