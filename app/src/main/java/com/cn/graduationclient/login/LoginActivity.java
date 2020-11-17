@@ -1,9 +1,11 @@
 package com.cn.graduationclient.login;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +17,7 @@ import android.text.method.PasswordTransformationMethod;
 import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -32,6 +35,7 @@ import com.cn.graduationclient.homepage.HomePageActivity;
 import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.login.otherLogin.Email;
 import com.cn.graduationclient.login.otherLogin.Phone;
+import com.cn.graduationclient.message.FriendMessage;
 import com.cn.graduationclient.tool.ExpressionUtil;
 
 import org.json.JSONException;

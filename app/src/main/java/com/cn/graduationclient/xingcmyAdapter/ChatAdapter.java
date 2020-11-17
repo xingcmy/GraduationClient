@@ -1,14 +1,18 @@
 package com.cn.graduationclient.xingcmyAdapter;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
+import android.os.Message;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ImageSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +38,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private Context context;
     int imageIds[] = ExpressionUtil.getExpressRcIds();
     private ArrayList<Chat> chatArrayList=new ArrayList<>();
+
+    @SuppressLint("HandlerLeak")
+    Handler handler=new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 0x01:
+                    break;
+            }
+        }
+    };
 
     public ChatAdapter(Context context, ArrayList<Chat> chatArrayList) {
         this.context = context;
@@ -73,34 +89,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         if(holder instanceof SendViewHolder){
             SendViewHolder viewHolder= (SendViewHolder) holder;
 
-//            byte[] bytes=chatArrayList.get(position).getMessage().getBytes();
-//            String out="";
-//            for (int i=0;i<bytes.length;i++){
-//                if (bytes[i]==91){
-//                    int j=i+1;
-//                    if (bytes[j]==102&&bytes[j+4]==93){
-//                        for (int o=i+2;o<i+5;o++){
-//                            char c=(char)bytes[o];
-//                            out+=c;
-//                        }
-//                        int num=Integer.parseInt(out);
-//                        Bitmap bitmap =new FriendMessage().smileB(num);
-//                        ImageSpan imageSpan = new ImageSpan(bitmap);
-//                        String str = "";
-//                        if(num < 10){
-//                            str = "[f00"+num+"]";
-//                        }else if(num < 100){
-//                            str = "[f0"+num+"]";
-//                        }else{
-//                            str = "[f"+num+"]";;
-//                        }
-//                        SpannableString spannableString = new SpannableString(str);
-//                        spannableString.setSpan(imageSpan, 0, str.length(),
-//                                Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-//                        viewHolder.textView_send.append(spannableString);
-//                    }
-//                }
-//            }
 
             Cursor right_cursor=sqLiteDatabase.rawQuery("select * from head where uid='"+chatArrayList.get(position).getName()+"'",null);
             if (right_cursor.getCount()>=0){
@@ -110,11 +98,72 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 }
 
             }
+
+
+
+
             viewHolder.right_time.setText(chatArrayList.get(position).getTime());
             if (chatArrayList.get(position).getMsg_type()== TypeSystem.MSG_TEXT){
                 viewHolder.textView_send.setVisibility(View.VISIBLE);
                 viewHolder.right_img.setVisibility(View.GONE);
-                viewHolder.textView_send.setText(chatArrayList.get(position).getMessage());
+
+//
+//                int lg=chatArrayList.get(position).getMessage().length();
+//                String[] msg=new String[lg];
+//                String[] split=chatArrayList.get(position).getMessage().split("");
+//                int i=0;
+//                for ( String str:split){
+//                    msg[i]=str;
+//                    i++;
+//                    if (i==lg){
+//                        break;
+//                    }
+//                }
+//
+//                int right=0;
+//                int count=0;
+//                for (int j=0;j<lg;j++){
+//                    if (msg[j].equals("[")){
+//                        int smile_left=j;
+//                        int f=j+1;
+//                        int smile_right=j+5;
+//                        if (smile_right<lg){
+//                            if (msg[smile_left].equals("[")&&msg[f].equals("f")&&msg[smile_right].equals("]")){
+//                                String smile=msg[j+2]+msg[j+3]+msg[j+4];
+//                                for (int left=right;left<j;left++){
+//                                    viewHolder.textView_send.append(msg[j]);
+//                                }
+//                                int pos=Integer.parseInt(smile);
+//                                Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(),imageIds[pos]);
+//                                ImageSpan imageSpan = new ImageSpan(bitmap);
+//                                String str="[f"+smile+"]";
+//                                SpannableString spannableString = new SpannableString(str);
+//                                spannableString.setSpan(imageSpan, 0, str.length(),
+//                                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+//                                viewHolder.textView_send.append(spannableString);
+//                                right=j+6;
+//                                count++;
+//
+//                            }
+//                        }
+//                    }
+//                }
+//                if (count!=0){
+//                    if (right<lg){
+//                        for (;right<lg;right++){
+//                            viewHolder.textView_send.append(msg[right]);
+//                        }
+//                    }
+//                }else {
+//                    viewHolder.textView_send.setText(chatArrayList.get(position).getMessage());
+//                }
+
+
+                SmileyParser.init(context);
+                SmileyParser smileyParser=SmileyParser.getInstance();
+                CharSequence charSequence=smileyParser.strToSmiley(chatArrayList.get(position).getMessage());
+                viewHolder.textView_send.setText(charSequence);
+               // viewHolder.textView_send.setText(chatArrayList.get(position).getMessage());
                 String end=chatArrayList.get(position).getTime();
                 viewHolder.my.setText(chatArrayList.get(position).getName());
             }else if (chatArrayList.get(position).getMsg_type()==TypeSystem.MSG_IMAGE){
@@ -130,34 +179,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             }
         }else if(holder instanceof ReceiveViewHolder){
             ReceiveViewHolder viewHolder= (ReceiveViewHolder) holder;
-//            byte[] bytes=chatArrayList.get(position).getMessage().getBytes();
-//            String out="";
-//            for (int i=0;i<bytes.length;i++){
-//                if (bytes[i]==91){
-//                    int j=i+1;
-//                    if (bytes[j]==102&&bytes[j+4]==93){
-//                        for (int o=i+2;o<i+5;o++){
-//                            char c=(char)bytes[o];
-//                            out+=c;
-//                        }
-//                        int num=Integer.parseInt(out);
-//                        Bitmap bitmap =new FriendMessage().smileB(num);
-//                        ImageSpan imageSpan = new ImageSpan(bitmap);
-//                        String str = "";
-//                        if(num < 10){
-//                            str = "[f00"+num+"]";
-//                        }else if(num < 100){
-//                            str = "[f0"+num+"]";
-//                        }else{
-//                            str = "[f"+num+"]";;
-//                        }
-//                        SpannableString spannableString = new SpannableString(str);
-//                        spannableString.setSpan(imageSpan, 0, str.length(),
-//                                Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-//                        viewHolder.textView_receive.append(spannableString);
-//                    }
-//                }
-//            }
+
             Cursor left_cursor=sqLiteDatabase.rawQuery("select * from head where uid='"+chatArrayList.get(position).getName()+"'",null);
             if (left_cursor.getCount()>=0){
                 while (left_cursor.moveToNext()){
@@ -169,7 +191,57 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             if (chatArrayList.get(position).getMsg_type()==TypeSystem.MSG_TEXT){
                 viewHolder.left_img.setVisibility(View.GONE);
                 viewHolder.textView_receive.setVisibility(View.VISIBLE);
-                viewHolder.textView_receive.setText(chatArrayList.get(position).getMessage());
+//
+//                int lg=chatArrayList.get(position).getMessage().length();
+//                String[] msg=new String[lg];
+//                String[] split=chatArrayList.get(position).getMessage().split("");
+//                int i=0;
+//                for ( String str:split){
+//                    msg[i]=str;
+//                    i++;
+//                    if (i==lg){
+//                        break;
+//                    }
+//                }
+//
+//                int right=0;
+//                int count=0;
+//                for (int j=0;j<lg;j++){
+//                    if (msg[j].equals("[")){
+//                        int smile_left=j;
+//                        int f=j+1;
+//                        int smile_right=j+5;
+//                        if (smile_right<lg){
+//                            if (msg[smile_left].equals("[")&&msg[f].equals("f")&&msg[smile_right].equals("]")){
+//                                String smile=msg[j+2]+msg[j+3]+msg[j+4];
+//                                for (int left=right;left<j;left++){
+//                                    viewHolder.textView_receive.append(msg[j]);
+//                                }
+//                                int pos=Integer.parseInt(smile);
+//                                CharSequence charSequence=new EmoticonsTextView(context).replace(smile);
+//                                viewHolder.textView_receive.append(charSequence);
+//                                right=j+6;
+//                                count++;
+//
+//                            }
+//                        }
+//                    }
+//                }
+//                if (count!=0){
+//                    if (right<lg){
+//                        for (;right<lg;right++){
+//                            viewHolder.textView_receive.append(msg[right]);
+//                        }
+//                    }
+//                }else {
+//                    viewHolder.textView_receive.setText(chatArrayList.get(position).getMessage());
+//                }
+
+                SmileyParser.init(context);
+                SmileyParser smileyParser=SmileyParser.getInstance();
+                CharSequence charSequence=smileyParser.strToSmiley(chatArrayList.get(position).getMessage());
+                viewHolder.textView_receive.setText(charSequence);
+
                 String end=chatArrayList.get(position).getTime();
                 viewHolder.your.setText(chatArrayList.get(position).getName());
             }else if (chatArrayList.get(position).getMsg_type()==TypeSystem.MSG_IMAGE){
@@ -193,7 +265,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     }
 
     private class SendViewHolder extends RecyclerView.ViewHolder {
-        private TextView textView_send,my,right_time;
+        private TextView my,right_time,textView_send;
         private ImageView right_img,right_head;
 
         public SendViewHolder(View itemView) {
@@ -207,7 +279,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     }
 
     private class ReceiveViewHolder extends RecyclerView.ViewHolder {
-        private TextView textView_receive,your,left_time;
+
+        private TextView your,left_time,textView_receive;
         private ImageView left_img,left_head;
 
         public ReceiveViewHolder(View itemView) {

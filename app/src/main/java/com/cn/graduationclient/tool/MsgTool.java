@@ -1,5 +1,6 @@
 package com.cn.graduationclient.tool;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -16,6 +17,8 @@ import java.io.IOException;
 import java.util.Base64;
 
 public class MsgTool implements Tool {
+
+    int imageIds[] = ExpressionUtil.getExpressRcIds();
 
     /**
      *
@@ -137,4 +140,6 @@ public class MsgTool implements Tool {
         Bitmap bitmap = BitmapFactory.decodeFile(path,options);
         return  bitmap;
     }
+
+
 }

@@ -78,6 +78,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
 
     private static final String TAG ="XINGCMY";
     private static final int REQUEST_CODE_SOME_FEATURES_PERMISSIONS =1 ;
+
     LinearLayout radio_message,radio_music,radio_my;
     TextView lable,data,title;
     ImageView photo;
@@ -87,31 +88,31 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     List<friends> friendsList;
     MusicAdapter adapter;
     MessageAdapter adapter_friend;
+
     Timer timer = new Timer();
+
     int index = 0;
     int legtht,back=0;
     Cursor cursor;
     int flog=0,flag=0,success=0,fsongrdm=0,songfoud=0;
+
     Random random=new Random();
+
     final int [] image=new int[]{R.drawable.ic_remote_view_play,R.drawable.ic_remote_view_pause};
     final int [] music_image=new int[]{R.drawable.ic_play,R.drawable.ic_pause};
     final int [] music_mode_image=new int[]{R.drawable.ic_play_mode_list,R.drawable.ic_play_mode_loop,R.drawable.ic_play_mode_shuffle,R.drawable.ic_play_mode_single};//顺序 列表循环 随机 单曲循环
+
     ImageView image_view_play_last,image_view_play_next,image_view_play_toggle;
     LinearLayout liner_music_list,liner_music;
     AppCompatSeekBar seekBar;
     AppCompatImageView button_view_music_toggle,button_view_music_last,button_view_music_next,button_play_mode_music_toggle;
-
     TextView text_view_name,text_view_music_name;
-
     ImageView image_view_album,image_view_album_music;
-
-
     RadioGroup radioGroup;
     RadioButton radioButton_list, radioButton_music, radioButton_files, radioButton_settings;
-
     TextView text_view_duration,text_view_progress;
-
     Handler  handler;
+
     HttpUtil httpUtil=new HttpUtil();
 
     String my_id,my_phone,my_email;
@@ -238,7 +239,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                         photo.setVisibility(View.VISIBLE);
                         Cursor c=sqLiteDatabase_new.rawQuery("select * from newfriend where uid='"+UID+"' and friend='"+id+"'",null);
                         if (c.getCount()>0){
-                            sqLiteDatabase_new.execSQL("update newfriend set msg='"+now+"'where uid='"+UID+"' and friend='"+id+"'");
+                            sqLiteDatabase_new.execSQL("update newfriend set msg='"+now+"',type='null' where uid='"+UID+"' and friend='"+id+"'");
                         }else if(c.getCount()<=0){
                             sqLiteDatabase_new.execSQL("insert into newfriend values('"+UID+"','"+id+"','"+now+"','null')");
                         }

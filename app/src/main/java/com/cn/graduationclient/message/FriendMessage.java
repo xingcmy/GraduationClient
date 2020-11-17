@@ -124,12 +124,15 @@ public class FriendMessage extends AppCompatActivity {
             super.handleMessage(msg);
             switch (msg.what){
                 case 0x00:
-                    chatArrayList.add(new Chat(etCtn.getText().toString(),ChatAdapter.TYPE_SEND,id,TypeSystem.MSG_TEXT,setTime(0)));
+                    chatArrayList.add(new Chat(etCtn.getText().toString(),ChatAdapter.TYPE_SEND,UID,TypeSystem.MSG_TEXT,setTime(0)));
                     chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
                     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(FriendMessage.this);
                     lv_message.setLayoutManager(linearLayoutManager);
                     lv_message.setAdapter(chatAdapter);
+                    int item=chatArrayList.size();
+                    lv_message.scrollToPosition(item-1);
                     etCtn.setText("");
+                    viewpager_layout.setVisibility(View.GONE);
                     break;
                 case 0x01:
                     String InMsg= (String) msg.obj;
@@ -143,20 +146,20 @@ public class FriendMessage extends AppCompatActivity {
                             String time=jsonObject.getString(StructureSystem.TIME);
                             int type=jsonObject.getInt(StructureSystem.TYPE);
 
-                            cursor_friend=sqLiteDatabase_friend.rawQuery("select * from friend where uid='"+UID+"' and friend='"+id+"'",null);
+                            cursor_friend=sqLiteDatabase_friend.rawQuery("select * from friend where uid='"+UID+"' and friend='"+send_id+"'",null);
                             if (cursor_friend.getCount()<=0){
                                 if (type==TypeSystem.MSG_IMAGE){
                                     String img="图片";
-                                    sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+id+"','"+img+"','"+time+"',"+type+")");
+                                    sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+send_id+"','"+img+"','"+time+"',"+type+")");
                                 }else {
-                                    sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+id+"','"+message+"','"+time+"',"+type+")");
+                                    sqLiteDatabase_friend.execSQL("insert into friend values('"+UID+"','"+send_id+"','"+message+"','"+time+"',"+type+")");
                                 }
                             }else if (cursor_friend.getCount()>0){
                                 if (type==TypeSystem.MSG_IMAGE){
                                     String img="图片";
-                                    sqLiteDatabase_friend.execSQL("update friend set msg='"+img+"',time='"+time+"',type="+type+" where uid='"+UID+"' and friend='"+id+"'");
+                                    sqLiteDatabase_friend.execSQL("update friend set msg='"+img+"',time='"+time+"',type="+type+" where uid='"+UID+"' and friend='"+send_id+"'");
                                 }else {
-                                    sqLiteDatabase_friend.execSQL("update friend set msg='"+message+"',time='"+time+"',type="+type+" where uid='"+UID+"' and friend='"+id+"'");
+                                    sqLiteDatabase_friend.execSQL("update friend set msg='"+message+"',time='"+time+"',type="+type+" where uid='"+UID+"' and friend='"+send_id+"'");
                                 }
                             }
 
@@ -164,7 +167,7 @@ public class FriendMessage extends AppCompatActivity {
                             if (type==TypeSystem.MSG_IMAGE){
                                 byte[] bytes=new MsgTool().StringToByte(message);
 
-                                filePath=new MsgTool().getFileByBytes(bytes,FriendMessage.this.getExternalFilesDir(null).getPath(),id+"to"+UID+setTime(1)+".jpg");
+                                filePath=new MsgTool().getFileByBytes(bytes,FriendMessage.this.getExternalFilesDir(null).getPath(),send_id+"to"+UID+setTime(1)+".jpg");
                                 Toast.makeText(FriendMessage.this,filePath,Toast.LENGTH_SHORT).show();
                                 Log.d("cs",filePath);
                                 if (filePath!=null||filePath!="") {
@@ -182,10 +185,20 @@ public class FriendMessage extends AppCompatActivity {
                             LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(FriendMessage.this);
                             lv_message.setLayoutManager(linearLayoutManager1);
                             lv_message.setAdapter(chatAdapter);
+                            int item1=chatArrayList.size();
+                            lv_message.scrollToPosition(item1-1);
                         }
                         else if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.FAILED)){
 
                         }
+
+//                        chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
+//                        LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(FriendMessage.this);
+//                        lv_message.setLayoutManager(linearLayoutManager1);
+//                        lv_message.setAdapter(chatAdapter);
+//
+//                        int item2=chatArrayList.size();
+//                        lv_message.scrollToPosition(item2-1);
 
 
                     } catch (JSONException e) {
@@ -207,6 +220,9 @@ public class FriendMessage extends AppCompatActivity {
                     LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(FriendMessage.this);
                     lv_message.setLayoutManager(linearLayoutManager1);
                     lv_message.setAdapter(chatAdapter);
+
+                    int item3=chatArrayList.size();
+                    lv_message.scrollToPosition(item3-1);
                     out.dismiss();
                     break;
                 case 0x03:
@@ -280,6 +296,10 @@ public class FriendMessage extends AppCompatActivity {
 
         sendMsg=findViewById(R.id.sendMsg);
         lv_message=findViewById(R.id.lv_message);
+
+        if(lv_message.getRecycledViewPool()!=null){
+            lv_message.getRecycledViewPool().setMaxRecycledViews(0, 10);
+        }
 
         ImageButton back=findViewById(R.id.imbtn_message_back);
         back.setOnClickListener(new View.OnClickListener() {
@@ -635,6 +655,14 @@ public class FriendMessage extends AppCompatActivity {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
+    public void onclickVoice(View view) {
+        Toast.makeText(FriendMessage.this,"该功能尚未开发",Toast.LENGTH_SHORT).show();
+    }
+
+    public void openMore(View view) {
+        Toast.makeText(FriendMessage.this,"该功能尚未开发",Toast.LENGTH_SHORT).show();
+    }
+
     private final class MyPageChangeListener implements ViewPager.OnPageChangeListener {
         private int curIndex = 0;
         public void onPageSelected(int index) {
@@ -676,6 +704,7 @@ public class FriendMessage extends AppCompatActivity {
                 spannableString.setSpan(imageSpan, 0, str.length(),
                         Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
                 etCtn.append(spannableString);
+
                 //viewpager_layout.setVisibility(View.GONE);
             }
         });
@@ -771,6 +800,8 @@ public class FriendMessage extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(FriendMessage.this);
         lv_message.setLayoutManager(linearLayoutManager);
         lv_message.setAdapter(chatAdapter);
+        int item=chatArrayList.size();
+        lv_message.scrollToPosition(item-1);
 
 //        }else {
 //            cursor.moveToNext();

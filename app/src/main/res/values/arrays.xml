@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="smiley_array" >
+        <item>[f000]</item><item>[f001]</item><item>[f002]</item><item>[f003]</item><item>[f004]</item>
+        <item>[f005]</item><item>[f006]</item><item>[f007]</item><item>[f008]</item><item>[f009]</item>
+        <item>[f010]</item><item>[f011]</item><item>[f012]</item><item>[f013]</item><item>[f014]</item><item>[f015]</item><item>[f016]</item><item>[f017]</item><item>[f018]</item><item>[f019]</item>
+        <item>[f020]</item><item>[f021]</item><item>[f022]</item><item>[f023]</item><item>[f024]</item><item>[f025]</item><item>[f026]</item><item>[f027]</item><item>[f028]</item><item>[f029]</item>
+        <item>[f030]</item><item>[f031]</item><item>[f032]</item><item>[f033]</item><item>[f034]</item><item>[f035]</item><item>[f036]</item><item>[f037]</item><item>[f038]</item><item>[f039]</item>
+        <item>[f040]</item><item>[f041]</item><item>[f042]</item><item>[f043]</item><item>[f044]</item><item>[f045]</item><item>[f046]</item><item>[f047]</item><item>[f048]</item><item>[f049]</item>
+        <item>[f050]</item><item>[f051]</item><item>[f052]</item><item>[f053]</item><item>[f054]</item><item>[f055]</item><item>[f056]</item><item>[f057]</item><item>[f058]</item><item>[f059]</item>
+        <item>[f060]</item><item>[f061]</item><item>[f062]</item><item>[f063]</item><item>[f064]</item><item>[f065]</item><item>[f066]</item><item>[f067]</item><item>[f068]</item><item>[f069]</item>
+        <item>[f070]</item><item>[f071]</item><item>[f072]</item><item>[f073]</item><item>[f074]</item><item>[f075]</item><item>[f076]</item><item>[f077]</item><item>[f078]</item><item>[f079]</item>
+        <item>[f080]</item><item>[f081]</item><item>[f082]</item><item>[f083]</item><item>[f084]</item><item>[f085]</item><item>[f086]</item><item>[f087]</item><item>[f088]</item><item>[f089]</item>
+        <item>[f090]</item><item>[f091]</item><item>[f092]</item><item>[f093]</item><item>[f094]</item><item>[f095]</item><item>[f096]</item><item>[f097]</item><item>[f098]</item><item>[f099]</item>
+        <item>[f100]</item><item>[f101]</item><item>[f102]</item><item>[f103]</item><item>[f104]</item><item>[f105]</item><item>[f106]</item>
+
+    </string-array>
+
+</resources>

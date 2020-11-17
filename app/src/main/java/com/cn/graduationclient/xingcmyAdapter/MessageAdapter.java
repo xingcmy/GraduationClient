@@ -55,7 +55,12 @@ public class MessageAdapter extends BaseAdapter {
             viewMessage=(viewMessage) view.getTag();
         }
         viewMessage.text_message_name.setText(messageList.get(i).getId());
-        viewMessage.text_message_nowmessage.setText(messageList.get(i).getMsg());
+
+        SmileyParser.init(context);
+        SmileyParser smileyParser=SmileyParser.getInstance();
+        CharSequence charSequence=smileyParser.strToSmiley(messageList.get(i).getMsg());
+        viewMessage.text_message_nowmessage.setText(charSequence);
+        //viewMessage.text_message_nowmessage.setText(messageList.get(i).getMsg());
         viewMessage.text_message_time.setText(messageList.get(i).getTime());
         return view;
     }
