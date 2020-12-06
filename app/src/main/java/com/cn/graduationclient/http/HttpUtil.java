@@ -1,6 +1,7 @@
 package com.cn.graduationclient.http;
 
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -31,9 +32,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpUtil implements ClientHttp {
+public class HttpUtil implements ClientHttp.post {
 
-    private static String str_url="http://192.168.1.105:8080/xingcmy/";
+    private static String str_url="http://192.168.1.103:8080/xingcmy/";
 
     @Override
     public HttpURLConnection http(String servlet) {
@@ -370,6 +371,72 @@ public class HttpUtil implements ClientHttp {
 
         InputStreamReader reader=new InputStreamReader(httpURLConnection.getInputStream());
 
+        BufferedReader bufferedReader=new BufferedReader(reader);
+        String line="";
+        if ((line=bufferedReader.readLine())!=null){
+            return line;
+        }
+        return null;
+    }
+
+    @Override
+    public String httpRandom(String setId, String getId, String msg, int type) throws IOException, JSONException {
+        HttpURLConnection httpURLConnection=http("RandomServer");
+        OutputStream outputStream=httpURLConnection.getOutputStream();
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
+
+        JSONObject jsonObject=new JSONObject();
+
+        jsonObject.put(StructureSystem.TYPE,type);
+        switch (type){
+            case 0:
+            case 2:
+            case 3:
+                jsonObject.put(StructureSystem.UID,setId);
+                break;
+            case 1:
+                jsonObject.put("UID",setId);
+                jsonObject.put("id",getId);
+                jsonObject.put("msg",msg);
+                break;
+
+        }
+
+        objectOutputStream.writeObject(jsonObject.toString());
+        objectOutputStream.flush();
+        objectOutputStream.close();
+
+        InputStreamReader reader=new InputStreamReader(httpURLConnection.getInputStream());
+        BufferedReader bufferedReader=new BufferedReader(reader);
+        String line="";
+        if ((line=bufferedReader.readLine())!=null){
+            return line;
+        }
+        return null;
+    }
+
+    public String httpRandomSetMsg(String setId, String getId, String msg, int type)throws IOException,JSONException{
+        HttpURLConnection httpURLConnection=http("RandomMsgServer");
+        OutputStream outputStream=httpURLConnection.getOutputStream();
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
+
+        JSONObject jsonObject=new JSONObject();
+
+        jsonObject.put(StructureSystem.TYPE,type);
+        jsonObject.put("UID",setId);
+        if (type==TypeSystem.WRITE){
+            jsonObject.put("id",getId);
+            jsonObject.put("msg",msg);
+        }else if (type==TypeSystem.READ){
+
+        }
+
+        Log.d("cs",jsonObject.toString());
+        objectOutputStream.writeObject(jsonObject.toString());
+        objectOutputStream.flush();
+        objectOutputStream.close();
+
+        InputStreamReader reader=new InputStreamReader(httpURLConnection.getInputStream());
         BufferedReader bufferedReader=new BufferedReader(reader);
         String line="";
         if ((line=bufferedReader.readLine())!=null){

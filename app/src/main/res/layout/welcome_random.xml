@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <com.cn.graduationclient.xingcmyAdapter.HoldTitle
+        android:id="@+id/welcome_random_hold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="随机聊天"
+        app:type="10"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/xingcmy_login">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+            <TextView
+                android:gravity="center_horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="尚未匹配到好友，请耐心等候/休息一下再来吧！"
+                android:textColor="@drawable/yellow"/>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>

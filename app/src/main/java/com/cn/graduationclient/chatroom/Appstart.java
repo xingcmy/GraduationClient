@@ -15,7 +15,7 @@ public class Appstart extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.appstart);
+		setContentView(R.layout.xingcmy);
 		
 	new Handler().postDelayed(new Runnable(){
 		@Override

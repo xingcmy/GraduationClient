@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main"
+    android:id="@+id/friend_main"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
@@ -75,7 +75,7 @@
             android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/before_recored_layout"
+            android:id="@+id/send_layout_msg"
             >
             <EditText
                 android:layout_width="fill_parent"
@@ -102,6 +102,22 @@
                 />
 
         </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#ccc" />
+
+        <com.cn.graduationclient.audio.RecordAudioButton
+            android:visibility="gone"
+            android:id="@+id/friend_voice"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/community_btn_chat_press_normal"
+            android:text="按住 说话"
+            android:textColor="#7e7e7e"/>
+
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -121,7 +137,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_contactless"
+                android:src="@drawable/btn_intercon"
                 android:onClick="onclickVoice"
                 android:background="#00000000"
                 android:id="@+id/btn_speak"/>

@@ -10,6 +10,7 @@ public class TypeSystem {
     public final static int MSG_VIDEO=3;
     public final static int MSG_NEW=4;
     public final static int MSG_SMILE=5;
+    public final static int MSG_VOICE=6;
 
     public final static int WRITE=110;
     public final static int READ=111;
@@ -17,4 +18,6 @@ public class TypeSystem {
     public final static int ADD_FRIEND=11;
     public final static int ADD_AGREE=12;
     public final static int ADD_REFUSE=13;
+
+    public final static int RANDOM=1024;
 }

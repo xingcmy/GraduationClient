@@ -73,6 +73,18 @@
 	            		android:layout_height="100dp"
 	            		android:layout_gravity="center_vertical"
 					/>
+					<com.cn.graduationclient.audio.VoiceImageView
+						android:visibility="gone"
+						android:id="@+id/right_voice"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:clickable="true"
+						android:focusable="true"
+						android:paddingStart="40dp"
+						android:paddingEnd="10dp"
+						android:src="@drawable/chatto_voice_play_frame"
+						android:paddingLeft="40dp"
+						android:paddingRight="10dp"/>
  				</LinearLayout>
 	            <TextView 
 	            android:id="@+id/is_my"

@@ -1,5 +1,6 @@
 package com.cn.graduationclient.tool;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,7 +15,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Date;
 
 public class MsgTool implements Tool {
 
@@ -139,6 +142,27 @@ public class MsgTool implements Tool {
         options.inPurgeable = true;
         Bitmap bitmap = BitmapFactory.decodeFile(path,options);
         return  bitmap;
+    }
+
+    public String setTime(int i){
+        String time="";
+        switch (i){
+            case 0:
+                @SuppressLint("SimpleDateFormat")
+                SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+                Date date = new Date(System.currentTimeMillis());
+                time=formatter.format(date);
+
+                break;
+            case 1:
+                @SuppressLint("SimpleDateFormat")
+                SimpleDateFormat formatter1= new SimpleDateFormat("yyyyMMddHHmmss");
+                Date date1 = new Date(System.currentTimeMillis());
+                time=formatter1.format(date1);
+                break;
+
+        }
+        return time;
     }
 
 

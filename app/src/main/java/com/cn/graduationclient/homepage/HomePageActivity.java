@@ -3,6 +3,7 @@ package com.cn.graduationclient.homepage;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -10,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,7 +20,10 @@ import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -36,6 +41,7 @@ import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.cn.graduationclient.R;
+import com.cn.graduationclient.audio.MainContract;
 import com.cn.graduationclient.cmd.StructureSystem;
 import com.cn.graduationclient.cmd.TypeSystem;
 import com.cn.graduationclient.db.FriendDbHelper;
@@ -44,6 +50,7 @@ import com.cn.graduationclient.db.NewFriendFbhelper;
 import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.message.AgreeRefuse;
 import com.cn.graduationclient.message.FriendMessage;
+import com.cn.graduationclient.message.Random.random;
 import com.cn.graduationclient.music.GetMusic;
 import com.cn.graduationclient.music.Music;
 import com.cn.graduationclient.music.MusicUtil;
@@ -63,6 +70,7 @@ import com.cn.graduationclient.xingcmyAdapter.friends;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Struct;
 import java.text.SimpleDateFormat;
@@ -96,6 +104,8 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     Cursor cursor;
     int flog=0,flag=0,success=0,fsongrdm=0,songfoud=0;
 
+    ImageButton more;
+
     Random random=new Random();
 
     final int [] image=new int[]{R.drawable.ic_remote_view_play,R.drawable.ic_remote_view_pause};
@@ -123,6 +133,14 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     NewFriendFbhelper newFriendFbhelper;
 
     SQLiteDatabase sqLiteDatabase,sqLiteDatabase_friend,sqLiteDatabase_new;
+
+    @SuppressLint("HandlerLeak")
+    Handler handler_longMusic=new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+        }
+    };
     @SuppressLint("HandlerLeak")
     Handler handler_newMsg=new Handler(){
         @Override
@@ -355,6 +373,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         }
 
 
+
         onclickMessage();
     }
 
@@ -402,6 +421,86 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
 
 
         //Toast.makeText(GetMusic.this,""+legtht,Toast.LENGTH_LONG).show();
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                String path=lists.get(position).getData();
+                String music_name=lists.get(position).getTitle();
+                String music_artist=lists.get(position).getArtist();
+                String music_duration=lists.get(position).getDuration();
+
+                Message message=new Message();
+                String[] msg=new String[]{path,music_name,music_artist,music_duration};
+                message.obj=msg;
+                handler_longMusic.sendMessage(message);
+
+                View view1=LinearLayout.inflate(HomePageActivity.this,R.layout.long_list_music,null);
+                final AlertDialog.Builder ab=new AlertDialog.Builder(HomePageActivity.this);
+                AlertDialog out_long=ab.create();
+                final Window window=out_long.getWindow();
+               // window.setBackgroundDrawable(new ColorDrawable(0));
+                out_long.setView(view1);
+                out_long.show();
+
+                int tim=Integer.parseInt(lists.get(position).getDuration());
+
+                String tm=new Music().formatTime(tim);
+
+                HoldTitle holdTitle=view1.findViewById(R.id.long_hold);
+                TextView name_long=view1.findViewById(R.id.text_title_long);
+                TextView artist_long=view1.findViewById(R.id.text_artist_long);
+                TextView duration_long=view1.findViewById(R.id.text_duration_long);
+                Button no=view1.findViewById(R.id.long_no);
+                Button yes=view1.findViewById(R.id.long_yes);
+
+                name_long.setText(music_name);
+                artist_long.setText(music_artist);
+                duration_long.setText(tm);
+
+                holdTitle.setIvbackOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        out_long.dismiss();
+                    }
+                });
+
+                no.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        out_long.dismiss();
+                    }
+                });
+                yes.setOnClickListener(new View.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.O)
+                    @Override
+                    public void onClick(View v) {
+                        File file=new File(path);
+                        String ends = null;
+                        if (file.getAbsolutePath().endsWith("mp3")){
+                            ends="mp3";
+                        }else if (file.getAbsolutePath().endsWith("wav")){
+                            ends="wav";
+                        }else if (file.getAbsolutePath().endsWith("flac")){
+                            ends="flac";
+                        }else if (file.getAbsolutePath().endsWith("ape")){
+                            ends="ape";
+                        }
+                        Toast.makeText(HomePageActivity.this,ends,Toast.LENGTH_SHORT).show();
+
+                        byte[] BFile =new MsgTool().getBytesByFile(path);
+                        String bytes=new MsgTool().ByteToString(BFile);
+                    }
+                });
+
+
+
+
+
+
+                return false;
+            }
+        });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -631,6 +730,15 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         adapter_friend=new MessageAdapter(friendsList,this);
         listView_msg.setAdapter(adapter_friend);
 
+        more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(HomePageActivity.this, com.cn.graduationclient.message.Random.random.class);
+                intent.putExtra("UID",UID);
+                startActivity(intent);
+            }
+        });
+
         listView_msg.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -823,6 +931,8 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         radioGroup=findViewById(R.id.radio_group_controls);
 
         seekBar=findViewById(R.id.seek_bar);
+
+        more=findViewById(R.id.more);
 
         text_view_name=findViewById(R.id.text_view_name);
         text_view_music_name=findViewById(R.id.text_view_music_name);

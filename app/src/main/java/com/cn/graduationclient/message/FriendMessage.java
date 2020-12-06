@@ -1,5 +1,6 @@
 package com.cn.graduationclient.message;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -18,9 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
-import android.provider.Contacts;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.Spannable;
@@ -39,9 +38,8 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,33 +54,27 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.cn.graduationclient.R;
 import com.cn.graduationclient.adapter.ExpressionGvAdapter;
-import com.cn.graduationclient.chatroom.Appstart;
+import com.cn.graduationclient.audio.MainContract;
+import com.cn.graduationclient.audio.MainPresenter;
+import com.cn.graduationclient.audio.RecordAudioButton;
+import com.cn.graduationclient.audio.RecordVoicePopWindow;
 import com.cn.graduationclient.cmd.StructureSystem;
 import com.cn.graduationclient.cmd.TypeSystem;
 import com.cn.graduationclient.constant.ContentFlag;
 import com.cn.graduationclient.db.FriendDbHelper;
 import com.cn.graduationclient.db.MessageDbHelper;
-import com.cn.graduationclient.homepage.HomePageActivity;
 import com.cn.graduationclient.http.HttpUtil;
-import com.cn.graduationclient.login.LoginActivity;
 import com.cn.graduationclient.tool.ExpressionUtil;
 import com.cn.graduationclient.tool.MsgTool;
 import com.cn.graduationclient.tool.SystemConstant;
 import com.cn.graduationclient.xingcmyAdapter.Chat;
 import com.cn.graduationclient.xingcmyAdapter.ChatAdapter;
 import com.cn.graduationclient.xingcmyAdapter.HoldTitle;
-import com.cn.graduationclient.xingcmyAdapter.MessageAdapter;
-import com.cn.graduationclient.xingcmyAdapter.TimeStampUtils;
-import com.cn.graduationclient.xingcmyAdapter.friendUItl;
 
-import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -90,7 +82,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class FriendMessage extends AppCompatActivity {
+import kr.co.namee.permissiongen.PermissionGen;
+
+public class FriendMessage<T extends MainContract.View> extends AppCompatActivity implements MainContract.View {
 
     private static final int REQUEST_CODE = 1;
     EditText etCtn;
@@ -98,6 +92,13 @@ public class FriendMessage extends AppCompatActivity {
     RelativeLayout express_spot_layout;
     ViewPager viewPager;
     Button sendMsg;
+    RecordAudioButton recordAudioButton;
+    LinearLayout sendLayout;
+    ImageButton speak;
+    LinearLayout rootMain;
+
+    MainContract.Presenter mPresenter;
+    RecordVoicePopWindow recordVoicePopWindow;
 
     String UID,id,name;
 
@@ -125,7 +126,7 @@ public class FriendMessage extends AppCompatActivity {
             switch (msg.what){
                 case 0x00:
                     chatArrayList.add(new Chat(etCtn.getText().toString(),ChatAdapter.TYPE_SEND,UID,TypeSystem.MSG_TEXT,setTime(0)));
-                    chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
+                    chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList,mPresenter);
                     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(FriendMessage.this);
                     lv_message.setLayoutManager(linearLayoutManager);
                     lv_message.setAdapter(chatAdapter);
@@ -181,7 +182,7 @@ public class FriendMessage extends AppCompatActivity {
                                     chatArrayList.add(new Chat(message,ChatAdapter.TYPE_RECEIVE,id,TypeSystem.MSG_TEXT,time));
                                 }
 
-                            chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
+                            chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList,mPresenter);
                             LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(FriendMessage.this);
                             lv_message.setLayoutManager(linearLayoutManager1);
                             lv_message.setAdapter(chatAdapter);
@@ -216,7 +217,7 @@ public class FriendMessage extends AppCompatActivity {
                             sqLiteDatabase_friend.execSQL("update friend set msg='"+img+"',time='"+setTime(0)+"',type="+TypeSystem.MSG_IMAGE+" where uid='"+UID+"' and friend='"+id+"'");
                     }
                     chatArrayList.add(new Chat((String) msg.obj,ChatAdapter.TYPE_SEND,UID,TypeSystem.MSG_IMAGE,setTime(0)));
-                    chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
+                    chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList,mPresenter);
                     LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(FriendMessage.this);
                     lv_message.setLayoutManager(linearLayoutManager1);
                     lv_message.setAdapter(chatAdapter);
@@ -296,6 +297,12 @@ public class FriendMessage extends AppCompatActivity {
 
         sendMsg=findViewById(R.id.sendMsg);
         lv_message=findViewById(R.id.lv_message);
+        recordAudioButton=findViewById(R.id.friend_voice);
+        sendLayout=findViewById(R.id.send_layout_msg);
+        speak=findViewById(R.id.btn_speak);
+        rootMain=findViewById(R.id.friend_main);
+
+       // mPresenter=new MainPresenter<MainContract.View>((MainContract.View) this,this);
 
         if(lv_message.getRecycledViewPool()!=null){
             lv_message.getRecycledViewPool().setMaxRecycledViews(0, 10);
@@ -655,12 +662,132 @@ public class FriendMessage extends AppCompatActivity {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
+
+    private void requestPermission() {
+        PermissionGen.with(this)
+                .addRequestCode(100)
+                .permissions(Manifest.permission.RECORD_AUDIO, Manifest.permission.WAKE_LOCK)
+                .request();
+    }
+
     public void onclickVoice(View view) {
-        Toast.makeText(FriendMessage.this,"该功能尚未开发",Toast.LENGTH_SHORT).show();
+        Toast.makeText(FriendMessage.this,"该功能尚未开发完成",Toast.LENGTH_SHORT).show();
+        viewpager_layout.setVisibility(View.GONE);
+        if (recordAudioButton.getVisibility()==View.VISIBLE){
+            sendLayout.setVisibility(View.VISIBLE);
+            recordAudioButton.setVisibility(View.GONE);
+            speak.setImageResource(R.drawable.btn_intercon);
+        }else if (recordAudioButton.getVisibility()==View.GONE){
+            recordAudioButton.setVisibility(View.VISIBLE);
+            sendLayout.setVisibility(View.GONE);
+            speak.setImageResource(R.drawable.btn_keyboard);
+
+            String time=setTime(1);
+            mPresenter=new MainPresenter<MainContract.View>(FriendMessage.this,this,UID,id,time,chatAdapter,lv_message,chatArrayList);
+
+            requestPermission();
+            mPresenter.init();
+
+            recordAudioButton.setOnVoiceButtonCallBack(new RecordAudioButton.OnVoiceButtonCallBack() {
+                @Override
+                public void onStartRecord() {
+                    mPresenter.startRecord();
+                }
+
+                @Override
+                public void onStopRecord() {
+                    mPresenter.stopRecord();
+                }
+
+                @Override
+                public void onWillCancelRecord() {
+                    mPresenter.willCancelRecord();
+                }
+
+                @Override
+                public void onContinueRecord() {
+                    mPresenter.continueRecord();
+                }
+            });
+//            chatArrayList.add(new Chat(this.getExternalFilesDir(null).getPath()+UID+"to"+id+time+".voice",
+//                    ChatAdapter.TYPE_SEND,UID,TypeSystem.MSG_VOICE,time));
+//            chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList,mPresenter);
+//            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(FriendMessage.this);
+//            lv_message.setLayoutManager(linearLayoutManager);
+//            lv_message.setAdapter(chatAdapter);
+//            int item=chatArrayList.size();
+//            lv_message.scrollToPosition(item-1);
+        }
+
     }
 
     public void openMore(View view) {
         Toast.makeText(FriendMessage.this,"该功能尚未开发",Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showList(List<File> list) {
+
+    }
+
+    @Override
+    public void showNormalTipView() {
+        if (recordVoicePopWindow==null){
+            recordVoicePopWindow=new RecordVoicePopWindow(this);
+        }
+        recordVoicePopWindow.showAsDropDown(rootMain);
+    }
+
+    @Override
+    public void showTimeOutTipView(int remainder) {
+        if (recordVoicePopWindow!=null){
+            recordVoicePopWindow.showTimeOutTipView(remainder);
+        }
+    }
+
+    @Override
+    public void showRecordingTipView() {
+        if (recordVoicePopWindow!=null){
+            recordVoicePopWindow.showRecordingTipView();
+        }
+    }
+
+    @Override
+    public void showRecordTooShortTipView() {
+        if (recordVoicePopWindow!=null){
+            recordVoicePopWindow.showRecordTooShortTipView();
+        }
+    }
+
+    @Override
+    public void showCancelTipView() {
+        if (recordVoicePopWindow!=null){
+            recordVoicePopWindow.showCancelTipView();
+        }
+    }
+
+    @Override
+    public void hideTipView() {
+        if (recordVoicePopWindow!=null){
+            recordVoicePopWindow.dismiss();
+        }
+    }
+
+    @Override
+    public void updateCurrentVolume(int db) {
+        if (recordVoicePopWindow!=null){
+            recordVoicePopWindow.updateCurrentVolume(db);
+        }
+    }
+
+    @Override
+    public void startPlayAnim(int position) {
+        chatAdapter.startPlayAnim(position);
+    }
+
+    @Override
+    public void stopPlayAnim() {
+        chatAdapter.stopPlayAnim();
     }
 
     private final class MyPageChangeListener implements ViewPager.OnPageChangeListener {
@@ -796,7 +923,7 @@ public class FriendMessage extends AppCompatActivity {
             }
 
         }
-        chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList);
+        chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList,mPresenter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(FriendMessage.this);
         lv_message.setLayoutManager(linearLayoutManager);
         lv_message.setAdapter(chatAdapter);

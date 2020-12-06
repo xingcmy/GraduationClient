@@ -20,11 +20,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
+
 import com.cn.graduationclient.R;
+import com.cn.graduationclient.audio.MainContract;
+import com.cn.graduationclient.audio.VoiceImageView;
 import com.cn.graduationclient.cmd.TypeSystem;
 import com.cn.graduationclient.db.HeadDbHelper;
 import com.cn.graduationclient.message.FriendMessage;
@@ -35,9 +41,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     public static final int TYPE_SEND=0;
     public static final int TYPE_RECEIVE=1;
 
+    private boolean mNextLoadEnable;
+    private boolean mLoadMoreEnable;
+    private boolean mLoading;
+    private int mLastPosition;
+    private int mCurrentPlayAnimPosition = -1;//当前播放动画的位置
+
+    protected List<File> mData;
+    private RequestLoadMoreListener mRequestLoadMoreListener;
     private Context context;
     int imageIds[] = ExpressionUtil.getExpressRcIds();
     private ArrayList<Chat> chatArrayList=new ArrayList<>();
+    private MainContract.Presenter mPresenter;
 
     @SuppressLint("HandlerLeak")
     Handler handler=new Handler(){
@@ -51,10 +66,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         }
     };
 
-    public ChatAdapter(Context context, ArrayList<Chat> chatArrayList) {
+    public ChatAdapter(Context context, ArrayList<Chat> chatArrayList, MainContract.Presenter mPresenter) {
+        this.context = context;
+        this.chatArrayList = chatArrayList;
+        this.mPresenter=mPresenter;
+    }
+
+    public ChatAdapter(Context context,ArrayList<Chat> chatArrayList){
         this.context = context;
         this.chatArrayList = chatArrayList;
     }
+
+
 
     @Override
     public int getItemViewType(int position) {
@@ -106,6 +129,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             if (chatArrayList.get(position).getMsg_type()== TypeSystem.MSG_TEXT){
                 viewHolder.textView_send.setVisibility(View.VISIBLE);
                 viewHolder.right_img.setVisibility(View.GONE);
+                viewHolder.right_voice.setVisibility(View.GONE);
 
 //
 //                int lg=chatArrayList.get(position).getMessage().length();
@@ -169,9 +193,22 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             }else if (chatArrayList.get(position).getMsg_type()==TypeSystem.MSG_IMAGE){
                 viewHolder.right_img.setVisibility(View.VISIBLE);
                 viewHolder.textView_send.setVisibility(View.GONE);
+                viewHolder.right_voice.setVisibility(View.GONE);
                 viewHolder.my.setText(chatArrayList.get(position).getName());
                 Bitmap bitmap=new MsgTool().decodeSampleBitmap(viewHolder.right_img,chatArrayList.get(position).getMessage());
                 viewHolder.right_img.setImageBitmap(bitmap);
+            }else if (chatArrayList.get(position).getMsg_type()==TypeSystem.MSG_VOICE){
+                viewHolder.right_voice.setVisibility(View.VISIBLE);
+                viewHolder.textView_send.setVisibility(View.GONE);
+                viewHolder.right_img.setVisibility(View.GONE);
+                viewHolder.right_voice.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.d("voice",chatArrayList.get(position).getMessage());
+                        int lg=Integer.parseInt(chatArrayList.get(position).getMessage());
+                        mPresenter.startPlayRecord(lg);
+                    }
+                });
             }
 
             if(position!=0){
@@ -190,6 +227,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             viewHolder.left_time.setText(chatArrayList.get(position).getTime());
             if (chatArrayList.get(position).getMsg_type()==TypeSystem.MSG_TEXT){
                 viewHolder.left_img.setVisibility(View.GONE);
+                viewHolder.left_voice.setVisibility(View.GONE);
                 viewHolder.textView_receive.setVisibility(View.VISIBLE);
 //
 //                int lg=chatArrayList.get(position).getMessage().length();
@@ -246,10 +284,23 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 viewHolder.your.setText(chatArrayList.get(position).getName());
             }else if (chatArrayList.get(position).getMsg_type()==TypeSystem.MSG_IMAGE){
                 viewHolder.textView_receive.setVisibility(View.GONE);
+                viewHolder.left_voice.setVisibility(View.GONE);
                 viewHolder.left_img.setVisibility(View.VISIBLE);
                 viewHolder.your.setText(chatArrayList.get(position).getName());
                 Bitmap bitmap=new MsgTool().decodeSampleBitmap(viewHolder.left_img,chatArrayList.get(position).getMessage());
                 viewHolder.left_img.setImageBitmap(bitmap);
+            }else if (chatArrayList.get(position).getMsg_type()==TypeSystem.MSG_VOICE){
+                viewHolder.left_voice.setVisibility(View.VISIBLE);
+                viewHolder.textView_receive.setVisibility(View.GONE);
+                viewHolder.left_img.setVisibility(View.GONE);
+                viewHolder.left_voice.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.d("voice",chatArrayList.get(position).getMessage());
+                        int lg=Integer.parseInt(chatArrayList.get(position).getMessage());
+                        mPresenter.startPlayRecord(lg);
+                    }
+                });
             }
 
             if(position!=0){
@@ -267,6 +318,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private class SendViewHolder extends RecyclerView.ViewHolder {
         private TextView my,right_time,textView_send;
         private ImageView right_img,right_head;
+        private VoiceImageView right_voice;
 
         public SendViewHolder(View itemView) {
             super(itemView);
@@ -275,6 +327,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             right_img=itemView.findViewById(R.id.right_msg_img);
             right_time=itemView.findViewById(R.id.tv_right_time);
             right_head=itemView.findViewById(R.id.is_my_head);
+            right_voice=itemView.findViewById(R.id.right_voice);
         }
     }
 
@@ -282,6 +335,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
         private TextView your,left_time,textView_receive;
         private ImageView left_img,left_head;
+        private VoiceImageView left_voice;
 
         public ReceiveViewHolder(View itemView) {
             super(itemView);
@@ -290,6 +344,27 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             left_img=itemView.findViewById(R.id.left_msg_img);
             left_time=itemView.findViewById(R.id.tv_left_time);
             left_head=itemView.findViewById(R.id.is_your_head);
+            left_voice=itemView.findViewById(R.id.left_voice);
         }
     }
+
+
+    public interface RequestLoadMoreListener {
+        void onLoadMoreRequested();
+    }
+
+    public void startPlayAnim(int position) {
+        mCurrentPlayAnimPosition = position;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * 停止播放动画
+     */
+    public void stopPlayAnim() {
+        mCurrentPlayAnimPosition = -1;
+        notifyDataSetChanged();
+    }
+
+
 }

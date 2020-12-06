@@ -21,8 +21,7 @@ public class ServerTherad implements Runnable {
 		String connet=null;
 		try {
 			while ((connet=readFromClient())!=null) {
-				
-				System.out.println("�ͻ���˵"+connet);
+
 				for (Socket ss:SimpleServer.socketList) {
 					OutputStream out=ss.getOutputStream();
 					out.write((connet+"\n").getBytes("utf-8"));
