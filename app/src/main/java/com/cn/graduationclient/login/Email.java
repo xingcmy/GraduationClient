@@ -67,10 +67,17 @@ public class Email extends Activity implements View.OnClickListener {
                     button.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            out.dismiss();
+
                             Email.this.finish();
+                            out.dismiss();
                         }
                     });
+                    break;
+                case 0x02:
+                    Toast.makeText(Email.this,"当前邮箱已被注册",Toast.LENGTH_LONG);
+                    break;
+                case 0x03:
+                    Toast.makeText(Email.this,"验证码发送成功",Toast.LENGTH_LONG);
                     break;
             }
         }
@@ -177,15 +184,19 @@ public class Email extends Activity implements View.OnClickListener {
                     @Override
                     public void run() {
                         try {
+                            Message message=new Message();
                             String j_email=httpUtil.httpEmail(et_email.getText().toString(), StructureSystem.REGISTER);
                             JSONObject jsonObject=new JSONObject(j_email);
                             if (jsonObject.getString("error").equals("success")){
                                 email_yan=jsonObject.getString("email_yan");
                                 Log.d("c",email_yan);
+                                message.what=0x03;
                             }else {
                                 Log.d("c",jsonObject.getString("error"));
+                                message.what=0x02;
                                 //Toast.makeText(Email.this,"该邮箱已被注册",Toast.LENGTH_LONG).show();
                             }
+                            handler.sendMessage(message);
 
                         } catch (IOException e) {
                             e.printStackTrace();

@@ -102,10 +102,12 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
     int index = 0;
     int legtht,back=0;
     Cursor cursor;
+    String ends = null;
     int flog=0,flag=0,success=0,fsongrdm=0,songfoud=0;
 
     ImageButton more;
 
+    AlertDialog out_long;
     Random random=new Random();
 
     final int [] image=new int[]{R.drawable.ic_remote_view_play,R.drawable.ic_remote_view_pause};
@@ -139,6 +141,19 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
+            String type=(String) msg.obj;
+            try {
+                JSONObject jsonObject=new JSONObject(type);
+                String error=jsonObject.getString(StructureSystem.ERROR);
+                if (error.equals(StructureSystem.SUCCESS)){
+                    Toast.makeText(HomePageActivity.this,"分享成功！",Toast.LENGTH_SHORT).show();
+                    out_long.dismiss();
+                }else if (error.equals(StructureSystem.FAILED)){
+                    Toast.makeText(HomePageActivity.this,"分享失败！",Toast.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     };
     @SuppressLint("HandlerLeak")
@@ -430,14 +445,9 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                 String music_artist=lists.get(position).getArtist();
                 String music_duration=lists.get(position).getDuration();
 
-                Message message=new Message();
-                String[] msg=new String[]{path,music_name,music_artist,music_duration};
-                message.obj=msg;
-                handler_longMusic.sendMessage(message);
-
                 View view1=LinearLayout.inflate(HomePageActivity.this,R.layout.long_list_music,null);
                 final AlertDialog.Builder ab=new AlertDialog.Builder(HomePageActivity.this);
-                AlertDialog out_long=ab.create();
+                out_long=ab.create();
                 final Window window=out_long.getWindow();
                // window.setBackgroundDrawable(new ColorDrawable(0));
                 out_long.setView(view1);
@@ -476,7 +486,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                     @Override
                     public void onClick(View v) {
                         File file=new File(path);
-                        String ends = null;
+                        //String ends = null;
                         if (file.getAbsolutePath().endsWith("mp3")){
                             ends="mp3";
                         }else if (file.getAbsolutePath().endsWith("wav")){
@@ -490,6 +500,22 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
 
                         byte[] BFile =new MsgTool().getBytesByFile(path);
                         String bytes=new MsgTool().ByteToString(BFile);
+
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    String error=httpUtil.httpSetMusic(UID,bytes,music_name,ends);
+                                    Message message=new Message();
+                                    message.obj=error;
+                                    handler_longMusic.sendMessage(message);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).start();
                     }
                 });
 
@@ -542,7 +568,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
-//更新Seekbar
+                //更新Seekbar
                 seekBar.setProgress(msg.what);
 
                 Update();
@@ -635,6 +661,7 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
                             }
                             break;
                         case 3:
+                            index=index;
                             mediaPlayer.reset();
                             try {
                                 seekBar.setMax(Integer.parseInt(lists.get(index).getDuration()));
@@ -1065,9 +1092,11 @@ public class HomePageActivity extends Activity implements View.OnClickListener {
             super.run();
             while (true){
                 try {
-                    Thread.sleep(2000);
-                    Message message=new Message();
-                    handler_newMsg.sendMessage(message);
+                    while (true){
+                        Thread.sleep(2000);
+                        Message message=new Message();
+                        handler_newMsg.sendMessage(message);
+                    }
                 }catch (InterruptedException e) {
                     e.printStackTrace();
                 }

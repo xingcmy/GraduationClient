@@ -16,6 +16,10 @@ public class MessageUtil {
     private Object msg;
     //相应中的数据
     private Object data;
+//音乐名
+    private String name;
+//后缀名
+    private String ends;
 
     public static ObjectMapper getMAPPER() {
         return MAPPER;
@@ -67,5 +71,21 @@ public class MessageUtil {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEnds() {
+        return ends;
+    }
+
+    public void setEnds(String ends) {
+        this.ends = ends;
     }
 }

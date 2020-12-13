@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.cn.graduationclient.R;
@@ -41,7 +42,13 @@ public class Information extends Activity {
 
     HttpUtil httpUtil=new HttpUtil();
 
-    Handler handler;
+    @SuppressLint("HandlerLeak")
+    Handler handler=new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+        }
+    };
 
     String UID;
 
@@ -88,6 +95,7 @@ public class Information extends Activity {
                 imageView.setImageBitmap(bitmap);
             }
         }
+
 
     }
 

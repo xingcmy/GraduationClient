@@ -85,6 +85,7 @@ public class random extends Activity {
                         }
                     }
                 }).start();
+                flag=false;
                 finish();
             }
         });
@@ -96,7 +97,7 @@ public class random extends Activity {
             super.run();
             try {
                 while (flag){
-                    Thread.sleep(1000);
+                    Thread.sleep(1500);
                     String error=httpUtil.httpRandom(UID,null,null,0);
                     Message message=new Message();
                     message.obj=error;

@@ -152,6 +152,18 @@ public interface ClientHttp {
          */
 
         String httpRandom(String setId,String getId,String msg,int type)throws IOException,JSONException;
+
+        /**
+         * 随机聊天发送/接收消息
+         * @param setId
+         * @param getId
+         * @param msg
+         * @param type
+         * @return
+         * @throws IOException
+         * @throws JSONException
+         */
+        String httpRandomSetMsg(String setId, String getId, String msg, int type)throws IOException,JSONException;
     }
 
 

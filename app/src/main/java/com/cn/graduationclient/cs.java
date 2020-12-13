@@ -45,7 +45,7 @@ public class cs extends Activity {
                     //post的方法体，用来添加数据（key-value方式），但只能添加字符串作为数据
                     FormBody formBody = new FormBody.Builder().add("w1", a1).add("w2", "wad").build();
                     //请求创建
-                    Request request = new Request.Builder().url("http://192.168.1.104:8080/titan/login").post(formBody).build();
+                    Request request = new Request.Builder().url("http://192.168.1.104:8080/login").post(formBody).build();
                     //执行请求
                     Call call = okHttpClient.newCall(request);
                     Response response = call.execute();//获得服务端返回内容

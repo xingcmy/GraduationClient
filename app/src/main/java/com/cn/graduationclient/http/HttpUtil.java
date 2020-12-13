@@ -468,4 +468,104 @@ public class HttpUtil implements ClientHttp.post {
         }
         return null;
     }
+
+    public String httpSetMusic(String UID,String music,String name,String ends)throws IOException,JSONException{
+
+        HttpURLConnection httpURLConnection=http("MusicServer");
+
+        OutputStream outputStream=httpURLConnection.getOutputStream();
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
+
+        MessageUtil messageUtil=new MessageUtil();
+        Map<String, Object> resultMap = new HashMap<>();
+        messageUtil.setSender(UID);
+        messageUtil.setMsg(music);
+        messageUtil.setName(name);
+        messageUtil.setEnds(ends);
+
+        objectOutputStream.writeObject(JSONUtil.ObjectToJson(messageUtil));
+        objectOutputStream.flush();
+        objectOutputStream.close();
+
+        InputStreamReader reader=new InputStreamReader(httpURLConnection.getInputStream());
+        BufferedReader readL=new BufferedReader(reader);
+        String line="";
+        while ((line=readL.readLine())!=null){
+            return line;
+        }
+        return null;
+    }
+
+    public String httpGetMusic(String UID,int type)throws IOException,JSONException{
+        HttpURLConnection httpURLConnection=http("GetMusic");
+
+        OutputStream outputStream=httpURLConnection.getOutputStream();
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
+
+        JSONObject jsonObject=new JSONObject();
+        jsonObject.put("UID",UID);
+        jsonObject.put("type",type);
+
+
+        objectOutputStream.writeObject(jsonObject.toString());
+        objectOutputStream.flush();
+        objectOutputStream.close();
+
+        InputStreamReader reader=new InputStreamReader(httpURLConnection.getInputStream());
+        BufferedReader readL=new BufferedReader(reader);
+        String line="";
+        while ((line=readL.readLine())!=null){
+            return line;
+        }
+        return null;
+    }
+
+    public String httpGetMusic(String UID,int type,String fileName)throws IOException,JSONException{
+        HttpURLConnection httpURLConnection=http("GetMusic");
+
+        OutputStream outputStream=httpURLConnection.getOutputStream();
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
+
+        JSONObject jsonObject=new JSONObject();
+        jsonObject.put("UID",UID);
+        jsonObject.put("type",type);
+        jsonObject.put("fileName",fileName);
+
+
+        objectOutputStream.writeObject(jsonObject.toString());
+        objectOutputStream.flush();
+        objectOutputStream.close();
+
+        InputStreamReader reader=new InputStreamReader(httpURLConnection.getInputStream());
+        BufferedReader readL=new BufferedReader(reader);
+        String line="";
+        while ((line=readL.readLine())!=null){
+            return line;
+        }
+        return null;
+    }
+
+    public String httpForget(String phone,String password)throws IOException,JSONException{
+        HttpURLConnection httpURLConnection=http("ForgetServer");
+
+        OutputStream outputStream=httpURLConnection.getOutputStream();
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
+
+        JSONObject jsonObject=new JSONObject();
+        jsonObject.put("phone",phone);
+        jsonObject.put("password",password);
+
+
+        objectOutputStream.writeObject(jsonObject.toString());
+        objectOutputStream.flush();
+        objectOutputStream.close();
+
+        InputStreamReader reader=new InputStreamReader(httpURLConnection.getInputStream());
+        BufferedReader readL=new BufferedReader(reader);
+        String line="";
+        while ((line=readL.readLine())!=null){
+            return line;
+        }
+        return null;
+    }
 }

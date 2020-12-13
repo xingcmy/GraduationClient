@@ -70,6 +70,12 @@
             android:layout_height="wrap_content"
             app:lable="@string/city"
             app:number="10"/>
+        <com.cn.graduationclient.xingcmyAdapter.Lable
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/information_music_lable"
+            app:lable="@string/myshare"
+            app:number="10"/>
 
     </LinearLayout>
 

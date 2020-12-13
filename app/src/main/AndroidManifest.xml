@@ -11,15 +11,18 @@
         android:roundIcon="@mipmap/xing_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:largeHeap="true"
+        android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
-        <activity android:name=".login.LoginActivity">
+        <activity android:name=".chatroom.Appstart">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".login.LoginActivity"/>
 
         <activity android:name=".login.Register"/>
         <activity android:name=".login.Email"/>
@@ -43,6 +46,8 @@
         <activity android:name=".message.AgreeRefuse"/>
         <activity android:name=".message.Random.random"/>
         <activity android:name=".message.Random.RandomFriend"/>
+        <activity android:name=".music.LookFriendMusic"/>
+        <activity android:name=".music.LookMyMusic"/>
     </application>
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
         tools:ignore="ProtectedPermissions" />

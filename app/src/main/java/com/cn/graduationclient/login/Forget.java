@@ -13,8 +13,15 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.cn.graduationclient.cmd.StructureSystem;
+import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.xingcmyAdapter.HoldTitle;
 import com.cn.graduationclient.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
@@ -26,6 +33,8 @@ public class Forget extends Activity implements View.OnClickListener {
     Handler handler,SQLhandler;
     boolean flag=true,flog=false;
     String phone_number,yan_number;
+
+    HttpUtil httpUtil=new HttpUtil();
 
     @SuppressLint("HandlerLeak")
     @Override
@@ -56,7 +65,27 @@ public class Forget extends Activity implements View.OnClickListener {
                             if (flog)
                                 if (result == SMSSDK.RESULT_COMPLETE) { //判断 手机号与验证码
 
-                                    //DBUtils.inuserupdata(edforget_phone.getText().toString(),edforget_password.getText().toString());
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            try {
+                                                Message message=new Message();
+                                                String del=httpUtil.httpForget(phone_number,edforget_password.getText().toString());
+                                                JSONObject jsonObject=new JSONObject(del);
+                                                String error=jsonObject.getString(StructureSystem.ERROR);
+                                                if (error.equals(StructureSystem.SUCCESS)){
+                                                    message.what=0x03;
+                                                }else if (error.equals(StructureSystem.FAILED)){
+                                                    message.what=0x04;
+                                                }
+                                                SQLhandler.sendMessage(message);
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }).start();
 
 
                                 } else
@@ -105,11 +134,20 @@ public class Forget extends Activity implements View.OnClickListener {
             public void handleMessage(@NonNull Message msg) {
                 switch (msg.what) {
                     case 0x01:
-                        Toast.makeText(Forget.this, "修改成功", Toast.LENGTH_LONG).show();
+                        Toast.makeText(Forget.this, "当前手机号尚未注册", Toast.LENGTH_LONG).show();
                         //String s = (String) msg.obj;
                         //et_user.setText(s);
                         break;
                     case 0x02:
+                        SMSSDK.getVerificationCode("86",phone_number);
+                        edforget_yan.requestFocus();
+                        flog=true;
+                        Toast.makeText(Forget.this, "验证码发送成功", Toast.LENGTH_LONG).show();
+                        break;
+                    case 0x03:
+                        Toast.makeText(Forget.this, "修改成功", Toast.LENGTH_LONG).show();
+                        break;
+                    case 0x04:
                         Toast.makeText(Forget.this, "修改失败", Toast.LENGTH_LONG).show();
                         break;
                 }
@@ -145,17 +183,45 @@ public class Forget extends Activity implements View.OnClickListener {
 
     public void setForget_finish() {
         if (judyan())
-            SMSSDK.submitVerificationCode("86",phone_number,yan_number);
-        flag=false;
+            if (TextUtils.isEmpty(edforget_password.getText().toString())){
+                Toast.makeText(Forget.this,"请输入新密码",Toast.LENGTH_LONG).show();
+            }else {
+                SMSSDK.submitVerificationCode("86",phone_number,yan_number);
+                flag=false;
+            }
+
 
 
     }
 
     public void setForget_yan() {
+
+
+        if (judPhone()) {
+            //submitPrivacyGrantResult(true);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String j_phone = httpUtil.httpPhone(phone_number, StructureSystem.LOGIN);
+                        Message message = new Message();
+                        JSONObject jsonObject = new JSONObject(j_phone);
+                        if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)) {
+                            message.what = 0x02;
+                        } else if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.FAILED)) {
+                            message.what = 0x01;
+                        }
+                        SQLhandler.sendMessage(message);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
         if (judPhone()){
-            SMSSDK.getVerificationCode("86",phone_number);
-            edforget_yan.requestFocus();
-            flog=true;
+
         }
 
     }

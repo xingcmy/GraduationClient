@@ -343,8 +343,7 @@ public class RandomFriend extends Activity {
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int positon,
-                                    long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int positon, long id) {
                 Bitmap bitmap = null;
                 int start = index * pageItemCount;
                 positon = positon + start;

@@ -147,6 +147,7 @@ public class Register extends Activity implements View.OnClickListener {
                         SMSSDK.getVerificationCode("86",phone_number);
                         et_yan.requestFocus();
                         flog=true;
+                        Toast.makeText(Register.this,"验证码发送成功",Toast.LENGTH_SHORT).show();
                         break;
                     case 0x03:
                         Toast.makeText(Register.this,"当前手机号已被注册",Toast.LENGTH_SHORT).show();

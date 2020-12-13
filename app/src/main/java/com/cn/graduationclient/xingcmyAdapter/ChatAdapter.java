@@ -54,17 +54,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private ArrayList<Chat> chatArrayList=new ArrayList<>();
     private MainContract.Presenter mPresenter;
 
-    @SuppressLint("HandlerLeak")
-    Handler handler=new Handler(){
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what){
-                case 0x01:
-                    break;
-            }
-        }
-    };
+//    @SuppressLint("HandlerLeak")
+//    Handler handler=new Handler(){
+//        @Override
+//        public void handleMessage(@NonNull Message msg) {
+//            super.handleMessage(msg);
+//            switch (msg.what){
+//                case 0x01:
+//                    break;
+//            }
+//        }
+//    };
 
     public ChatAdapter(Context context, ArrayList<Chat> chatArrayList, MainContract.Presenter mPresenter) {
         this.context = context;

@@ -23,6 +23,8 @@ import com.cn.graduationclient.R;
 import com.cn.graduationclient.db.HeadDbHelper;
 import com.cn.graduationclient.http.HttpUtil;
 import com.cn.graduationclient.login.LoginActivity;
+import com.cn.graduationclient.music.LookFriendMusic;
+import com.cn.graduationclient.music.LookMyMusic;
 import com.cn.graduationclient.tool.MsgTool;
 import com.cn.graduationclient.xingcmyAdapter.HoldTitle;
 import com.cn.graduationclient.xingcmyAdapter.Lable;
@@ -36,9 +38,10 @@ public class Information extends Activity implements View.OnClickListener {
 
     HoldTitle information_hold;
 
-    Lable information_id,information_name,information_signature,information_sex,information_birthday,information_profession,information_email,information_city;
+    Lable information_id,information_name,information_signature,information_sex,information_birthday,information_profession,information_email,information_city,music;
 
     String id,name,signature,sex,birthday,profession,email,city;
+    int count;
 
     Button alter_information,send_message;
     ImageView imageView;
@@ -78,32 +81,74 @@ public class Information extends Activity implements View.OnClickListener {
         handler=new Handler(){
             @Override
             public void handleMessage(Message msg) {
-                String mation=(String) msg.obj;
-                if (mation!=null){
-                    try {
-                        JSONObject jsonObject=new JSONObject(mation);
+                switch (msg.what){
+                    case 0x01:
+                        int num=msg.arg1;
+                        count=num;
+                        music.setTv_labletitle(num+"");
+                        break;
+                    case 0x02:
+                        String mation=(String) msg.obj;
+                        if (mation!=null){
+                            try {
+                                JSONObject jsonObject=new JSONObject(mation);
 
-                        name=jsonObject.getString("name");
-                        signature=jsonObject.getString("signature");
-                        sex=jsonObject.getString("sex");
-                        birthday=jsonObject.getString("birthday");
-                        profession=jsonObject.getString("profession");
-                        city=jsonObject.getString("city");
+                                name=jsonObject.getString("name");
+                                signature=jsonObject.getString("signature");
+                                sex=jsonObject.getString("sex");
+                                birthday=jsonObject.getString("birthday");
+                                profession=jsonObject.getString("profession");
+                                city=jsonObject.getString("city");
 
-                        information_name.setTv_labletitle(name);
-                        information_signature.setTv_labletitle(signature);
-                        information_sex.setTv_labletitle(sex);
-                        information_birthday.setTv_labletitle(birthday);
-                        information_profession.setTv_labletitle(profession);
-                        information_city.setTv_labletitle(city);
+                                information_name.setTv_labletitle(name);
+                                information_signature.setTv_labletitle(signature);
+                                information_sex.setTv_labletitle(sex);
+                                information_birthday.setTv_labletitle(birthday);
+                                information_profession.setTv_labletitle(profession);
+                                information_city.setTv_labletitle(city);
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        break;
                 }
+
 
             }
         };
+
+        music.setTv_labletitle("正在获取歌曲数量....");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String count=httpUtil.httpGetMusic(UID,2);
+                    JSONObject jsonObject=new JSONObject(count);
+                    int num=jsonObject.getInt("fileCount");
+                    Message message=new Message();
+                    message.arg1=num;
+                    message.what=0x01;
+                    handler.sendMessage(message);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        music.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent1=new Intent(Information.this, LookMyMusic.class);
+                intent1.putExtra("UID",UID);
+                intent1.putExtra("name",name);
+                intent1.putExtra("type","my1024");
+                finish();
+                startActivity(intent1);
+            }
+        });
 
         new Thread(new Runnable() {
             @RequiresApi(api = Build.VERSION_CODES.O)
@@ -126,7 +171,7 @@ public class Information extends Activity implements View.OnClickListener {
                         sqLiteDatabase.execSQL("update head set msg='"+filePath+"' where uid='"+UID+"'");
                     }
                     Message message=handler.obtainMessage();
-                    //message.what=0x01;
+                    message.what=0x02;
 
                     message.obj=msg;
                     handler.sendMessage(message);
@@ -156,6 +201,7 @@ public class Information extends Activity implements View.OnClickListener {
         information_email.setTv_labletitle(email);
         information_profession=findViewById(R.id.information_lable_profession);
         information_city=findViewById(R.id.information_lable_city);
+        music=findViewById(R.id.information_music_lable);
 
         alter_information=findViewById(R.id.alter_information);
         send_message=findViewById(R.id.send_message);

@@ -27,6 +27,7 @@ import android.text.SpannableString;
 import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,6 +65,7 @@ import com.cn.graduationclient.constant.ContentFlag;
 import com.cn.graduationclient.db.FriendDbHelper;
 import com.cn.graduationclient.db.MessageDbHelper;
 import com.cn.graduationclient.http.HttpUtil;
+import com.cn.graduationclient.music.LookFriendMusic;
 import com.cn.graduationclient.tool.ExpressionUtil;
 import com.cn.graduationclient.tool.MsgTool;
 import com.cn.graduationclient.tool.SystemConstant;
@@ -96,6 +98,7 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
     LinearLayout sendLayout;
     ImageButton speak;
     LinearLayout rootMain;
+    int MsgLg;
 
     MainContract.Presenter mPresenter;
     RecordVoicePopWindow recordVoicePopWindow;
@@ -112,7 +115,7 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
     Cursor cursor,cursor_friend;
 
     ChatAdapter chatAdapter;
-   ArrayList<Chat> chatArrayList = new ArrayList<>();
+   ArrayList<Chat> chatArrayList ;//= new ArrayList<>();
     String path;
     int type;
     AlertDialog out;
@@ -134,6 +137,7 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
                     lv_message.scrollToPosition(item-1);
                     etCtn.setText("");
                     viewpager_layout.setVisibility(View.GONE);
+                    MsgLg++;
                     break;
                 case 0x01:
                     String InMsg= (String) msg.obj;
@@ -141,6 +145,7 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
                         JSONObject jsonObject=new JSONObject(InMsg);
                         Log.d("cs",jsonObject+"");
                         if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.SUCCESS)){
+                            MsgLg++;
                             String send_id=jsonObject.getString(StructureSystem.ID);
                             String message=jsonObject.getString(StructureSystem.MSG);
                             //Toast.makeText(FriendMessage.this,message,Toast.LENGTH_SHORT).show();
@@ -225,9 +230,19 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
                     int item3=chatArrayList.size();
                     lv_message.scrollToPosition(item3-1);
                     out.dismiss();
+                    MsgLg++;
                     break;
                 case 0x03:
                     Toast.makeText(FriendMessage.this,"发送失败！",Toast.LENGTH_SHORT).show();
+                    break;
+                case 0x04:
+                    //onCreate(null);
+                    chatArrayList = new ArrayList<>();
+                    setList();
+                    break;
+                case 0x05:
+                    setListMsg();
+                    Toast.makeText(FriendMessage.this,"1",Toast.LENGTH_LONG).show();
                     break;
             }
 
@@ -240,7 +255,7 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            if (msg.obj!=null||msg.obj!=""){
+            if (!msg.obj.equals("")){
                 View view=getLayoutInflater().inflate(R.layout.file_path,null);
                 final AlertDialog.Builder ab=new AlertDialog.Builder(FriendMessage.this);
                 out=ab.create();
@@ -259,14 +274,9 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
                     @RequiresApi(api = Build.VERSION_CODES.O)
                     @Override
                     public void onClick(View v) {
-                        if (filePath!=null||filePath!=""){
-                            byte[] BFile =new MsgTool().getBytesByFile(filePath);
-                            String bytes=new MsgTool().ByteToString(BFile);
-                            FileMsg(bytes,filePath);
-                        }else {
-                            Toast.makeText(FriendMessage.this,"没有选择文件",Toast.LENGTH_SHORT).show();
-                        }
-
+                        byte[] BFile =new MsgTool().getBytesByFile(filePath);
+                        String bytes=new MsgTool().ByteToString(BFile);
+                        FileMsg(bytes,filePath);
                     }
                 });
                 holdTitle.setIvbackOnClickListener(new View.OnClickListener() {
@@ -275,6 +285,8 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
                         out.dismiss();
                     }
                 });
+            }else {
+                Toast.makeText(FriendMessage.this,"您尚未选择图片",Toast.LENGTH_SHORT).show();
             }
         }
     };
@@ -295,12 +307,26 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
         id=intent.getStringExtra(StructureSystem.ID);
         name=intent.getStringExtra(StructureSystem.NAME);
 
+        chatArrayList = new ArrayList<>();
         sendMsg=findViewById(R.id.sendMsg);
         lv_message=findViewById(R.id.lv_message);
         recordAudioButton=findViewById(R.id.friend_voice);
         sendLayout=findViewById(R.id.send_layout_msg);
         speak=findViewById(R.id.btn_speak);
         rootMain=findViewById(R.id.friend_main);
+
+        ImageButton buttonMusic=findViewById(R.id.imbtn_message_more);
+        buttonMusic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent1=new Intent(FriendMessage.this, LookFriendMusic.class);
+                intent1.putExtra("UID",UID);
+                intent1.putExtra("id",id);
+                intent1.putExtra("type","you2048");
+                intent1.putExtra("name",name);
+                startActivity(intent1);
+            }
+        });
 
        // mPresenter=new MainPresenter<MainContract.View>((MainContract.View) this,this);
 
@@ -376,6 +402,51 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
                 }
             }
         });
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true){
+                    try {
+                        Thread.sleep(2000);
+                        Message message=new Message();
+                        message.what=0x04;
+                        handler.sendMessage(message);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                while (true){
+//                    try {
+//                        Thread.sleep(1000);
+//                        Message message=new Message();
+//                        Cursor cursor1=sqLiteDatabase.rawQuery("select * from message where uid='"+UID+"' and id='"+id+"'",null);
+//                        int length=cursor1.getCount();
+//                        if (length>MsgLg){
+//                            cursor1.moveToLast();
+//                            if (cursor1.getString(2).equals(id)){
+//                                MsgLg++;
+//                               // chatArrayList.add(new Chat(cursor1.getString(3),ChatAdapter.TYPE_RECEIVE,cursor1.getString(2),cursor1.getInt(5),cursor1.getString(4)));
+//                                message.what=0x05;
+//                                // handler.sendMessage(message);
+//                            }
+//
+//                        }
+//                        handler.sendMessage(message);
+//                    }catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//
+//                }
+//            }
+//        }).start();
     }
 
     public void FileMsg(String fileString,String path){
@@ -390,7 +461,6 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
                         sqLiteDatabase.execSQL("insert into message values('"+UID+"','"+id+"','"+UID+"','"+path+"','"+setTime(0)+"',"+TypeSystem.MSG_IMAGE+")");
                         message.what=0x02;
                         message.obj=path;
-
                     }else if (jsonObject.getString(StructureSystem.ERROR).equals(StructureSystem.FAILED)){
                         message.what=0x03;
                     }
@@ -847,13 +917,15 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
                     Object msg= null;
                     try {
                         Thread.sleep(500);
+                        Message message=new Message();
                         msg = httpUtil.httpInMsg(UID, TypeSystem.READ);
                         if (msg!=null){
-                            Message message=new Message();
+
                             message.obj=msg;
                             message.what=0x01;
-                            handler.sendMessage(message);
+
                         }
+                        handler.sendMessage(message);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
@@ -865,6 +937,15 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
 
 
         }
+    }
+
+    public void setListMsg(){
+        chatAdapter = new ChatAdapter(FriendMessage.this, chatArrayList,mPresenter);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(FriendMessage.this);
+        lv_message.setLayoutManager(linearLayoutManager);
+        lv_message.setAdapter(chatAdapter);
+        int item=chatArrayList.size();
+        lv_message.scrollToPosition(item-1);
     }
 
     public String setTime(int i){
@@ -896,6 +977,7 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
         HashMap<String, String> al;
 
         int length=cursor.getCount();
+        MsgLg=length;
         String[] id=new String[length];
         String[] name=new String[length];
         String[] message=new String[length];
@@ -929,6 +1011,7 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
         lv_message.setAdapter(chatAdapter);
         int item=chatArrayList.size();
         lv_message.scrollToPosition(item-1);
+        cursor.close();
 
 //        }else {
 //            cursor.moveToNext();
@@ -974,6 +1057,17 @@ public class FriendMessage<T extends MainContract.View> extends AppCompatActivit
         Bitmap bitmap = null;
         bitmap = BitmapFactory.decodeResource(getResources(),imageIds[positon]);
         return bitmap;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if (keyCode == event.KEYCODE_BACK) {
+            //Toast.makeText(this, "再按一次退出", Toast.LENGTH_SHORT).show();
+            finish();
+            return super.onKeyDown(keyCode,event);
+        }
+        return false;
     }
 
 
